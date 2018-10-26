@@ -1,21 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-func YourHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Gorilla!\n"))
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("GopherBox!\n"))
+}
+
+func EventsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "VARS: %v\n", vars)
 }
 
 func main() {
 	r := mux.NewRouter()
-	// Routes consist of a path and a handler function.
-	r.HandleFunc("/", YourHandler)
+	r.HandleFunc("/", IndexHandler)
+	r.HandleFunc("/events", EventsHandler).Methods("GET", "POST")
 
-	// Bind to a port and pass our router in
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
