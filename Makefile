@@ -1,9 +1,10 @@
 
 
 build_main:
-	GOARCH=amd64 GOOS=linux go build -o gopher-box main.go
+	GOARCH=amd64 GOOS=linux go build -o ./build/gopher-box main.go
 
 
-deploy:
-	scp gopher-box 130.193.56.206:/tmp/gopher-box
+deploy: build_main
+	scp ./scripts/deploy.sh 130.193.56.206:/tmp/deploy.sh
+	scp ./build/gopher-box 130.193.56.206:/tmp/gopher-box
 
