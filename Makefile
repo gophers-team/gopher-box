@@ -1,4 +1,7 @@
 
+build_device:
+	GOARCH=arm64 GOOS=linux go build -o ./build/device device.go
+
 
 build_main:
 	GOARCH=amd64 GOOS=linux go build -o ./build/gopher-box main.go
