@@ -12,5 +12,5 @@ go build
 
 Device:
 ```
-GOARCH=arm64 go build main.go
+GOARCH=arm64 GOOS=linux go build main.go
 ```
