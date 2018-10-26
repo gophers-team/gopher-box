@@ -23,5 +23,5 @@ func main() {
 	r.HandleFunc("/", IndexHandler)
 	r.HandleFunc("/events", EventsHandler).Methods("GET", "POST")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(":80", r))
 }
