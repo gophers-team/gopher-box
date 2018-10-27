@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"gobot.io/x/gobot"
@@ -233,7 +234,7 @@ func (h *httpRequester) PostJson(endpoint string, val interface{}) (*http.Respon
 		if readErr != nil {
 			data = []byte{}
 		}
-		text := string(data)
+		text := strings.TrimSpace(string(data))
 		errText := fmt.Sprintf("request to %s failed with %d status code: %s", url, resp.StatusCode, text)
 		log.Println(errText)
 		return nil, errors.New(errText)
