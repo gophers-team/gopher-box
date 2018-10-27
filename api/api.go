@@ -28,6 +28,6 @@ var DeviceDispenseEndpoint = "/dispense"
 
 type DeviceTabletDispenseRequest struct {
 	DeviceID    DeviceID    `json:"device_id"`
-	Fulfilled   bool        `json:"fulfilled"`
+	Fulfillment map[TabletID]TableAmount
 	OperationID OperationID `json:"operation_id"`
 }
