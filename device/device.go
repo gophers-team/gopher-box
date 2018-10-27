@@ -116,11 +116,11 @@ func main() {
 		for event := range tabletButtonEvents {
 			switch event.Name {
 			case gpio.ButtonPush: // skipping, acting on push
-				if *debugButton {
-					log.Printf("button push event: %+v", event)
+				if isDoubleEvent() {
 					continue
 				}
-				if isDoubleEvent() {
+				if *debugButton {
+					log.Printf("button push event: %+v", event)
 					continue
 				}
 				err = tabletButtonPush(rd)
@@ -129,11 +129,11 @@ func main() {
 				}
 
 			case gpio.ButtonRelease:
-				if *debugButton {
-					log.Printf("button release event: %+v", event)
+				if isDoubleEvent() {
 					continue
 				}
-				if isDoubleEvent() {
+				if *debugButton {
+					log.Printf("button release event: %+v", event)
 					continue
 				}
 			case gpio.Error:
