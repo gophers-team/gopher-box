@@ -38,8 +38,13 @@ func dispenseHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed to unmarshal /dispense request"))
 		return
 	}
-
+	err := dispensingEnd(db, t.OperationID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
+	return
 }
 
 func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
