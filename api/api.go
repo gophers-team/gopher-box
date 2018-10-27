@@ -1,15 +1,18 @@
 package api
 
+type DeviceID string
+type EventType string
+
 var DeviceHeartbeatEndpoint = "/heartbeat"
 
 type DeviceHeartbeat struct {
-	DeviceID string `json:"device_id"`
+	DeviceID DeviceID `json:"device_id"`
 }
 
 var DeviceStatusEndpoint = "/status"
 
 type DeviceTabletStatusRequest struct {
-	DeviceID string `json:"device_id"`
+	DeviceID DeviceID `json:"device_id"`
 }
 
 type TabletID string
@@ -22,6 +25,6 @@ type DeviceTabletStatusResponse struct {
 var DeviceDispenseEndpoint = "/dispense"
 
 type DeviceTabletDispenseRequest struct {
-	DeviceID string `json:"device_id"`
+	DeviceID DeviceID `json:"device_id"`
 	Fullfilled bool `json:"fullfilled"`
 }
