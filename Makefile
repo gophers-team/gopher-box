@@ -22,10 +22,6 @@ deploy:
 
 	ssh root@130.193.56.206 'systemctl stop gopher-box.service;'
 
-	ssh root@130.193.56.206 'rm -f /var/lib/gopher-box/db'
-	ssh root@130.193.56.206 '/usr/local/bin/gopher-box --db-file /var/lib/gopher-box/db --init-db'
-	ssh root@130.193.56.206 'sqlite3 /var/lib/gopher-box/db < /srv/fixture.sql'
-
 	ssh root@130.193.56.206 'cd /srv && /usr/local/go/bin/go build -o /usr/local/bin/gopher-box ./server'
 	ssh root@130.193.56.206 'systemctl restart gopher-box.service; systemctl daemon-reload; systemctl restart gopher-box.service'
 
