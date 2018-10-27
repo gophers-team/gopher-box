@@ -24,10 +24,20 @@ type Event struct {
 	CreatedAt   time.Time `db:"created_at"`
 }
 
-type Plan struct {
+type DispensingPlan struct {
 	Id        int
 	Name      string
 	CreatedAt time.Time `db:"created_at"`
+}
+
+type DispensingSchedule struct {
+	Id           int
+	PlanId       int `db:"plan_id"`
+	PillId       int `db:"pill_id"`
+	Amount       int
+	DispenseDow  int       `db:"dispense_dow"`
+	DispenseTime time.Time `db:"dispense_time"`
+	CreatedAt    time.Time `db:"created_at"`
 }
 
 func InitDb(dbFile string) (*sqlx.DB, error) {

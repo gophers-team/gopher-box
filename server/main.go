@@ -32,13 +32,24 @@ func main() {
 		db.MustExec(schema)
 	}
 	if *showPlans {
-		plans := []Plan{}
+		plans := []DispensingPlan{}
 		err = db.Select(&plans, "SELECT * FROM dispensing_plans")
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, plan := range plans {
 			fmt.Println("%v", plan)
+
+			schedules := []DispensingSchedule{}
+			err = db.Select(
+				&schedules, "SELECT * FROM dispensing_schedule WHERE plan_id=$1 ORDER BY dispense_dow", plan.Id,
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, schedule := range schedules {
+				fmt.Println("%v", schedule)
+			}
 		}
 	}
 	if *server {

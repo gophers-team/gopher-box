@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS devices;
 DROP TABLE IF EXISTS pills;
 DROP TABLE IF EXISTS dispensing_plans;
-DROP TABLE IF EXISTS dispense_schedule;
+DROP TABLE IF EXISTS dispensing_schedule;
 DROP TABLE IF EXISTS operations;
 
 CREATE TABLE devices (
@@ -26,13 +26,13 @@ CREATE TABLE dispensing_plans (
     created_at  DATETIME
 );
 
-CREATE TABLE dispense_schedule (
+CREATE TABLE dispensing_schedule (
     id          	INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     plan_id     	INTEGER NOT NULL,
 	pill_id			INTEGER NOT NULL,
 	amount			INTEGER NOT NULL,
-	dispence_dow	INTEGER NOT NULL,
-	dispence_time   DATETIME NOT NULL,
+	dispense_dow	INTEGER NOT NULL,
+	dispense_time   DATETIME NOT NULL,
 	created_at  	DATETIME,
 	FOREIGN KEY (plan_id) REFERENCES plans(id)
 	FOREIGN KEY (pill_id) REFERENCES pills(id)
