@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/gophers-team/gopher-box/api"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -33,6 +36,22 @@ func EventsHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "VARS: %v\n", vars)
 }
 
+func deviceDispenseHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Failed to read device /dispense request")
+		return
+	}
+	var t api.DeviceTabletDispenseRequest
+	err = json.Unmarshal(data, &t)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Failed to read device /dispense request"))
+	}
+	db.
+}
+
 func main() {
 	db, err := InitDb()
 	if err != nil {
@@ -43,6 +62,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", IndexHandler)
 	r.HandleFunc("/events", DbHandler(db, EventsHandler)).Methods(http.MethodGet, http.MethodPost)
+	r.HandleFunc(api.DeviceDispenseEndpoint, DbHandler(db, deviceDispenseHandler)).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":8000", r))
 }

@@ -13,7 +13,7 @@ type EventType uint8
 
 const (
 	Heartbeat EventType = iota
-	PillsTaken
+	PillsDispensed
 )
 
 type Schema struct {
@@ -30,6 +30,11 @@ CREATE TABLE events (
     description VARCHAR(255),
     timestamp   DATETIME,
     created_at  DATETIME
+);
+
+CREATE TABLE operations (
+	id        INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	device_id VARCHAR(127) NOT NULL
 );
 `,
 	drop: `
