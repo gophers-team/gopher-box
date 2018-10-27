@@ -67,3 +67,13 @@ func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		log.Panic(err)
 	}
 }
+
+func deviceListHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
+	resp := api.DeviceListResponse([]api.DeviceInfo{
+		api.DeviceInfo{DeviceID: api.DeviceID(1488), Status: api.DeviceStatusOnline},
+		api.DeviceInfo{DeviceID: api.DeviceID(228), Status: api.DeviceStatusOffline},
+	})
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Panic(err)
+	}
+}

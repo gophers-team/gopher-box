@@ -68,6 +68,8 @@ type requestData struct {
 	tabletDispensers map[api.TabletID]*tabletDispenser
 }
 
+var globalTabletID api.TabletID // for dbg purposes only
+
 func main() {
 	tty := flag.String("tty", "/dev/ttyMSM1", "arduino tty")
 	in1 := flag.String("in1", "8", "in1")
@@ -77,13 +79,15 @@ func main() {
 	tabletButtonPin := flag.String("tablet-button-pin", "12", `pin of "give me tablets!" button`)
 	tabletButtonPollInterval := flag.Duration("tablet-button-poll-interval", 10*time.Millisecond, `poll interval of "give me tablets!" button`)
 	stepsPerRev := flag.Uint("steps-per-rev", 2038, "steps per rev")
-	step := flag.Int("step", 2038, "step")
+	step := flag.Int("step", -2038, "step")
 	rpm := flag.Uint("rpm", 10, "rpm speed")
 	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.Int("device-id", 1337, "the (unique) id of the device")
 	tabletID := flag.String("tablet-id", "0", "tablet id (type of tablets)")
 	debugButton := flag.Bool("debug-button", false, "debug button events")
+	debugRotate := flag.Bool("debug-rotate", false, "debug always rotatig mode")
+	debugStatusOk := flag.Bool("debug-status", false, "debug status with always one tablet")
 	flag.Parse()
 
 	pins := [...]string{*in1, *in2, *in3, *in4}
@@ -96,6 +100,7 @@ func main() {
 		server: *server,
 	}
 	tid := api.TabletID(*tabletID)
+	globalTabletID = tid
 	rd := &requestData{
 		requester: &requester,
 		deviceID:  api.DeviceID(*deviceID),
@@ -108,7 +113,9 @@ func main() {
 
 	work := func() {
 		go heartbeat(rd, *heartbeetInterval)
-		go rd.tabletDispensers[tid].DbgRotate()
+		if *debugRotate {
+			go rd.tabletDispensers[tid].DbgRotate()
+		}
 
 		err := tabletButton.Start()
 		if err != nil {
@@ -134,10 +141,12 @@ func main() {
 					log.Printf("button push event: %+v", event)
 					continue
 				}
-				err = tabletButtonPush(rd)
-				if err != nil {
-					log.Fatalf("error processing button push: %v", err)
-				}
+				go func() {
+					err = tabletButtonPush(rd, *debugStatusOk)
+					if err != nil {
+						log.Fatalf("error processing button push: %v", err)
+					}
+				}()
 
 			case gpio.ButtonRelease:
 				if isDoubleEvent() {
@@ -184,8 +193,21 @@ func heartbeat(rd *requestData, interval time.Duration) {
 	}
 }
 
-func tabletButtonPush(rd *requestData) error {
-	s, err := status(rd)
+func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
+	var (
+		s *api.DeviceTabletStatusResponse
+		err error
+	)
+	if debugStatusOk {
+		s = &api.DeviceTabletStatusResponse{
+			Tablets: map[api.TabletID]api.TabletAmount{
+				globalTabletID: api.TabletAmount(1),
+			},
+			OperationID: api.OperationID(42),
+		}
+	} else {
+		s, err = status(rd)
+	}
 	if err != nil {
 		// TODO: it'll be nice to notify user that the server is down
 		return err
