@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"gobot.io/x/gobot"
@@ -131,6 +132,8 @@ func main() {
 			return ret
 		}
 
+		var inButtonHandler uint32
+
 		for event := range tabletButtonEvents {
 			switch event.Name {
 			case gpio.ButtonPush: // skipping, acting on push
@@ -141,7 +144,11 @@ func main() {
 					log.Printf("button push event: %+v", event)
 					continue
 				}
+				if !atomic.CompareAndSwapUint32(&inButtonHandler, 0, 1) {
+					continue
+				}
 				go func() {
+					defer atomic.StoreUint32(&inButtonHandler, 0)
 					err = tabletButtonPush(rd, *debugStatusOk)
 					if err != nil {
 						log.Fatalf("error processing button push: %v", err)

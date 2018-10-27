@@ -56,11 +56,11 @@ func main() {
 	if *server {
 		r := mux.NewRouter()
 
-		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(*static))))
 		r.HandleFunc(api.DeviceDispenseEndpoint, DbHandler(db, dispenseHandler)).Methods(http.MethodPost)
 		r.HandleFunc(api.DeviceStatusEndpoint, DbHandler(db, statusHandler)).Methods(http.MethodPost)
 		r.HandleFunc(api.DeviceHeartbeatEndpoint, DbHandler(db, heartbeatHandler)).Methods(http.MethodPost)
 		r.HandleFunc(api.DeviceEndpoint, DbHandler(db, deviceListHandler)).Methods(http.MethodGet)
+		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(*static))))
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
 	}
 }

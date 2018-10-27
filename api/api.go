@@ -3,23 +3,13 @@ package api
 type DeviceID int
 type EventType string
 type OperationID int64
-type DeviceStatus int
+type DeviceStatus string
 
 const (
-	DeviceStatusUnspecified DeviceStatus = iota
-	DeviceStatusOnline
-	DeviceStatusOffline
+	DeviceStatusUnspecified DeviceStatus = "unspecified"
+	DeviceStatusOnline                   = "online"
+	DeviceStatusOffline                  = "offline"
 )
-
-var deviceStatusText = map[DeviceStatus]string{
-	DeviceStatusUnspecified: "unspecified",
-	DeviceStatusOnline:      "online",
-	DeviceStatusOffline:     "offline",
-}
-
-func DeviceStatusText(status DeviceStatus) string {
-	return deviceStatusText[status]
-}
 
 var DeviceHeartbeatEndpoint = "/heartbeat"
 
@@ -53,7 +43,7 @@ var DeviceEndpoint = "/device"
 
 type DeviceInfo struct {
 	DeviceID DeviceID     `json:"device_id"`
-	Status   DeviceStatus
+	Status   DeviceStatus `json:"status"`
 }
 
 type DeviceListResponse []DeviceInfo
