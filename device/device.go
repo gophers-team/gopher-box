@@ -254,8 +254,7 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 		s, err = status(rd)
 	}
 	if err != nil {
-		// TODO: it'll be nice to notify user that the server is down
-		rd.BlinkFailLed(1)
+		rd.BlinkFailLed(2)
 		return err
 	}
 
