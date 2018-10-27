@@ -12,8 +12,8 @@ build_main_local:
 	go build -o ./build/gopher-box ./server
 
 deploy: build_main
-	scp ./scripts/deploy.sh 130.193.56.206:/tmp/deploy.sh
-	scp ./build/gopher-box 130.193.56.206:/tmp/gopher-box
+	scp ./scripts/deploy.sh root@130.193.56.206:/tmp/deploy.sh
+	scp ./build/gopher-box root@130.193.56.206:/tmp/gopher-box
 
 deploy_device: build_device
 	scp -C ./build/device linaro@172.31.19.157:
