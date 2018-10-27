@@ -54,13 +54,14 @@ func heartbeatHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 	var h api.DeviceHeartbeat
 	err = json.Unmarshal(data, &h)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to unmarshal /heartbeat request"))
 		return
 	}
 	tx := db.MustBegin()
 	tx.MustExec(heartbeatQuery, h.DeviceID, Heartbeat, time.Now())
 	tx.Commit()
+	w.WriteHeader(http.StatusOK)
 }
 
 func deviceDispenseHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
@@ -73,7 +74,7 @@ func deviceDispenseHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) 
 	var t api.DeviceTabletDispenseRequest
 	err = json.Unmarshal(data, &t)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to unmarshal /dispense request"))
 		return
 	}
