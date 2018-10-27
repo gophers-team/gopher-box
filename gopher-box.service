@@ -5,6 +5,6 @@ Description=Gopher box
 Type=simple
 ExecStartPre=-mkdir -p /var/lib/gopher-box
 ExecStartPre=-touch /var/lib/gopher-box/db
-ExecStart=/srv/gopher-box
+ExecStart=/srv/gopher-box -server
 Restart=on-failure
 
