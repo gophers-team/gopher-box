@@ -84,7 +84,7 @@ func (rd *requestData) BlinkOkLed(times uint) {
 	blinkLed(rd.statusOkLed, times)
 }
 
-func (rd *requestData) BlinkOffLed(times uint) {
+func (rd *requestData) BlinkFailLed(times uint) {
 	blinkLed(rd.statusFailLed, times)
 }
 
@@ -255,7 +255,7 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 	}
 	if err != nil {
 		// TODO: it'll be nice to notify user that the server is down
-		go rd.BlinkOffLed(1)
+		rd.BlinkFailLed(1)
 		return err
 	}
 
