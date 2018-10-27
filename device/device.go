@@ -218,7 +218,7 @@ func (h *httpRequester) PostJson(endpoint string, val interface{}) (*http.Respon
 	if err != nil {
 		return nil, fmt.Errorf("marshaling json object for %s failed: %v", endpoint, err)
 	}
-	url := fmt.Sprintf("http://%s/%s", h.server, endpoint)
+	url := fmt.Sprintf("http://%s%s", h.server, endpoint)
 	body := bytes.NewBuffer(data)
 	log.Printf("sending request to %s", url)
 	resp, err := http.Post(url, "application/json", body)
