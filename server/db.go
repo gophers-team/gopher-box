@@ -15,11 +15,6 @@ const (
 	PillsDispensed
 )
 
-type Schema struct {
-	create string
-	drop   string
-}
-
 type Event struct {
 	Id          int `db:"id"`
 	DeviceId    api.DeviceID
@@ -27,6 +22,12 @@ type Event struct {
 	Description string    `db:"description"`
 	Timestamp   time.Time `db:"timestamp"`
 	CreatedAt   time.Time `db:"created_at"`
+}
+
+type Plan struct {
+	Id        int
+	Name      string
+	CreatedAt time.Time `db:"created_at"`
 }
 
 func InitDb(dbFile string) (*sqlx.DB, error) {

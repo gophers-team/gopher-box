@@ -13,9 +13,13 @@ import (
 
 func main() {
 	initDb := flag.Bool("init-db", false, "initialize database")
-	server := flag.Bool("server", false, "start server")
 	dbFile := flag.String("db-file", "/var/lib/gopher-box/events.db", "database file path")
+
+	server := flag.Bool("server", false, "start server")
 	port := flag.Int("port", 80, "server's port")
+
+	showPlans := flag.Bool("show-plans", false, "show plans")
+
 	flag.Parse()
 
 	db, err := InitDb(*dbFile)
@@ -26,6 +30,16 @@ func main() {
 
 	if *initDb {
 		db.MustExec(schema)
+	}
+	if *showPlans {
+		plans := []Plan{}
+		err = db.Select(&plans, "SELECT * FROM dispensing_plans")
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, plan := range plans {
+			fmt.Println("%v", plan)
+		}
 	}
 	if *server {
 		r := mux.NewRouter()
