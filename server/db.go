@@ -31,6 +31,15 @@ type DispensingSchedule struct {
 	CreatedAt        time.Time `db:"created_at"`
 }
 
+type DeviceDispensing struct {
+	Id             int       `db:"id"`
+	DeviceId       int       `db:"device_id"`
+	ScheduleId     int       `db:"schedule_id"`
+	PillsDispensed int       `db:"pills_dispensed"`
+	Status         string    `db:"status"`
+	CreatedAt      time.Time `db:"created_at"`
+}
+
 func InitDb(dbFile string) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("sqlite3", dbFile)
 	return db, err

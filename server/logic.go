@@ -8,38 +8,25 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var saveHeartbeatQuery = `
-INSERT INTO heartbeats (device_id, created_at)
-VALUES ($1, $2)`
-
 func saveHeartbeat(db *sqlx.DB, deviceID api.DeviceID) error {
 	tx := db.MustBegin()
-	tx.MustExec(saveHeartbeatQuery, deviceID, time.Now())
-	tx.Commit()
-	return nil
+	tx.MustExec(`
+		INSERT INTO heartbeats (device_id, created_at)
+		VALUES ($1, $2)
+	`, deviceID, time.Now())
+	return tx.Commit()
 }
 
-var insertDeviceDispensingQuery = `
-INSERT INTO device_dispensings (device_id, status, created_at)
-VALUES ($1, $2, $3)`
-
-var selectDispensingSchedule = `
-SELECT p.name, ds.amount FROM dispensing_schedule AS ds
-INNER JOIN dispensing_plans AS dp ON ds.plan_id = dp.id
-INNER JOIN devices AS d ON d.plan_id = dp.id
-INNER JOIN pills AS p ON p.id = ds.pill_id
-WHERE d.id = $1
-`
-
-func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pills map[api.TabletID]api.TabletAmount, err error) {
-	tx := db.MustBegin()
-	res := tx.MustExec(insertDeviceDispensingQuery, deviceID, "begin", time.Now())
-	tx.Commit()
-	operationID, err = res.LastInsertId()
-
+func getPills(db *sqlx.DB, deviceID api.DeviceID) (pills map[api.TabletID]api.TabletAmount, err error) {
 	pills = make(map[api.TabletID]api.TabletAmount)
-	tx = db.MustBegin()
-	rows, err := tx.Queryx(selectDispensingSchedule, deviceID)
+	tx := db.MustBegin()
+	rows, err := tx.Queryx(`
+		SELECT p.name, ds.amount FROM dispensing_schedule AS ds
+		INNER JOIN dispensing_plans AS dp ON ds.plan_id = dp.id
+		INNER JOIN devices AS d ON d.plan_id = dp.id
+		INNER JOIN pills AS p ON p.id = ds.pill_id
+		WHERE d.id = $1
+	`, deviceID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,6 +39,18 @@ func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pil
 		}
 		pills[api.TabletID(name)] = api.TabletAmount(amount)
 	}
+	return pills, nil
+}
 
+func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pills map[api.TabletID]api.TabletAmount, err error) {
+	tx := db.MustBegin()
+	res := tx.MustExec(`
+		INSERT INTO device_dispensings (device_id, status, created_at)
+		VALUES ($1, $2, $3)
+	`, deviceID, "begin", time.Now())
+	tx.Commit()
+	operationID, err = res.LastInsertId()
+
+	pills, err = getPills(db, deviceID)
 	return operationID, pills, err
 }
