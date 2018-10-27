@@ -253,7 +253,7 @@ func (h *httpRequester) PostJson(endpoint string, val interface{}) (*http.Respon
 		return nil, fmt.Errorf("request to %s failed: %v", url, err)
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close()
 		data, readErr := ioutil.ReadAll(resp.Body)
 		if readErr != nil {
