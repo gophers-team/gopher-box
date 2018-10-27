@@ -9,51 +9,46 @@ DROP TABLE IF EXISTS dispensing_plans;
 DROP TABLE IF EXISTS dispensing_schedule;
 
 CREATE TABLE dispensing_plans (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    id          SERIAL PRIMARY KEY,
 	name 		VARCHAR(255) NOT NULL,
-    created_at  DATETIME
+    created_at  TIMESTAMP
 );
 
 CREATE TABLE devices (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-	plan_id    	INTEGER NOT NULL,
+    id          SERIAL PRIMARY KEY,
+	plan_id    	INTEGER REFERENCES dispensing_plans(id),
 	name 		VARCHAR(255) NOT NULL,
-    created_at  DATETIME,
-	FOREIGN KEY (plan_id) REFERENCES dispensing_plans(id)
-);
-
-CREATE TABLE device_dispensings (
-	id          	INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    device_id     	INTEGER NOT NULL,
-	schedule_id		INTEGER,
-	pills_dispensed	INTEGER,
-	status 			VARCHAR(255) NOT NULL,
-    created_at  	DATETIME,
-	FOREIGN KEY (device_id) REFERENCES devices(id)
-	FOREIGN KEY (schedule_id) REFERENCES dispensing_schedule(id)
+    created_at  TIMESTAMP
 );
 
 CREATE TABLE pills (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    id          SERIAL PRIMARY KEY,
 	name 		VARCHAR(255) NOT NULL,
-    created_at  DATETIME
+    created_at  TIMESTAMP
 );
 
 CREATE TABLE heartbeats (
     device_id   INTEGER NOT NULL,
-    created_at  DATETIME NOT NULL
+    created_at  TIMESTAMP NOT NULL
 );
 
 CREATE TABLE dispensing_schedule (
-	id          		INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    plan_id     		INTEGER NOT NULL,
-	pill_id				INTEGER NOT NULL,
+	id          		SERIAL PRIMARY KEY,
+    plan_id     		INTEGER REFERENCES dispensing_plans(id),
+	pill_id				INTEGER REFERENCES pills(id),
 	amount				INTEGER NOT NULL,
 	dispense_dow		INTEGER NOT NULL,
-	dispense_time   	DATETIME NOT NULL,
+	dispense_time   	TIMESTAMP NOT NULL,
 	schedule_duration 	INTEGER NOT NULL,
-	created_at  		DATETIME,
-	FOREIGN KEY (plan_id) REFERENCES plans(id)
-	FOREIGN KEY (pill_id) REFERENCES pills(id)
+	created_at  		TIMESTAMP
+);
+
+CREATE TABLE device_dispensings (
+	id          	SERIAL PRIMARY KEY,
+    device_id     	INTEGER REFERENCES devices(id),
+	schedule_id		INTEGER  REFERENCES dispensing_schedule(id),
+	pills_dispensed	INTEGER,
+	status 			VARCHAR(255) NOT NULL,
+    created_at  	TIMESTAMP
 );
 `

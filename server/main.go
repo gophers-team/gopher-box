@@ -8,7 +8,6 @@ import (
 
 	"github.com/gophers-team/gopher-box/api"
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -16,6 +15,7 @@ func main() {
 	dbFile := flag.String("db-file", "/var/lib/gopher-box/events.db", "database file path")
 
 	server := flag.Bool("server", false, "start server")
+	devel := flag.Bool("devel", false, "devel mode")
 	static := flag.String("static", "static", "static files dir")
 	port := flag.Int("port", 80, "server's port")
 
@@ -23,7 +23,7 @@ func main() {
 
 	flag.Parse()
 
-	db, err := InitDb(*dbFile)
+	db, err := InitDb(*dbFile, *devel)
 	if err != nil {
 		log.Fatal(err)
 	}
