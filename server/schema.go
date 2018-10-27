@@ -1,9 +1,10 @@
 package main
 
 var schema = `
-DROP TABLE IF EXISTS devices;
-DROP TABLE IF EXISTS device_dispensings;
 DROP TABLE IF EXISTS pills;
+DROP TABLE IF EXISTS devices;
+DROP TABLE IF EXISTS heartbeats;
+DROP TABLE IF EXISTS device_dispensings;
 DROP TABLE IF EXISTS dispensing_plans;
 DROP TABLE IF EXISTS dispensing_schedule;
 
@@ -38,6 +39,11 @@ CREATE TABLE dispensing_plans (
     created_at  DATETIME
 );
 
+CREATE TABLE heartbeats (
+    device_id   INTEGER NOT NULL,
+    created_at  DATETIME NOT NULL,
+);
+
 CREATE TABLE dispensing_schedule (
 	id          		INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     plan_id     		INTEGER NOT NULL,
@@ -50,5 +56,4 @@ CREATE TABLE dispensing_schedule (
 	FOREIGN KEY (plan_id) REFERENCES plans(id)
 	FOREIGN KEY (pill_id) REFERENCES pills(id)
 );
-
 `

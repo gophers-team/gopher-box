@@ -36,13 +36,11 @@ func EventsHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 var heartbeatQuery = `
-INSERT INTO events (
+INSERT INTO heartbeats (
 	device_id,
-	event_type,
-	timestamp,
 	created_at
 )
-VALUES ($1, $2, $3, $3)`
+VALUES ($1, $2)`
 
 func heartbeatHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -59,7 +57,7 @@ func heartbeatHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx := db.MustBegin()
-	tx.MustExec(heartbeatQuery, h.DeviceID, Heartbeat, time.Now())
+	tx.MustExec(heartbeatQuery, h.DeviceID, time.Now())
 	tx.Commit()
 	w.WriteHeader(http.StatusOK)
 }

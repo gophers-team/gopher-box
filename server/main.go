@@ -57,7 +57,7 @@ func main() {
 		r.HandleFunc("/", IndexHandler)
 		r.HandleFunc("/events", DbHandler(db, EventsHandler)).Methods(http.MethodGet, http.MethodPost)
 		r.HandleFunc(api.DeviceDispenseEndpoint, DbHandler(db, deviceDispenseHandler)).Methods(http.MethodPost)
-		r.HandleFunc(api.DeviceHeartbeatEndpoint, DbHandler(db, deviceDispenseHandler)).Methods(http.MethodPost)
+		r.HandleFunc(api.DeviceHeartbeatEndpoint, DbHandler(db, heartbeatHandler)).Methods(http.MethodPost)
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
 	}
 }
