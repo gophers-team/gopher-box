@@ -79,7 +79,7 @@ func main() {
 	rpm := flag.Uint("rpm", 10, "rpm speed")
 	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
-	deviceID := flag.String("device-id", "gophers-device-1337", "the (unique) name of the device")
+	deviceID := flag.Int("device-id", 1337, "the (unique) id of the device")
 	tabletID := flag.String("tablet-id", "0", "tablet id (type of tablets)")
 	debugButton := flag.Bool("debug-button", false, "debug button events")
 	flag.Parse()
