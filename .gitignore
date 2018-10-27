@@ -2,6 +2,8 @@ gopher-box
 build
 main
 
+*.db
+
 *.sw[op]
 *.tmp
 
