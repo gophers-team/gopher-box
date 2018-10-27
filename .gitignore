@@ -1,3 +1,8 @@
 gopher-box
 build
 main
+
+*.sw[op]
+*.tmp
+
+.idea/
