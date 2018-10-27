@@ -73,6 +73,7 @@ func main() {
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.String("device-id", "gophers-device-1337", "the (unique) name of the device")
 	tabletID := flag.String("tablet-id", "0", "tablet id (type of tablets)")
+	debugButton := flag.Bool("debug-button", false, "debug button events")
 	flag.Parse()
 
 	pins := [...]string{*in1, *in2, *in3, *in4}
@@ -108,6 +109,10 @@ func main() {
 		for event := range tabletButtonEvents {
 			switch event.Name {
 			case gpio.ButtonPush: // skipping, acting on push
+				if *debugButton {
+					log.Printf("button push event: %+v", event)
+					continue
+				}
 				if buttonInited {
 					err = tabletButtonPush(rd)
 					if err != nil {
@@ -117,7 +122,15 @@ func main() {
 					buttonInited = true
 				}
 			case gpio.ButtonRelease:
+				if *debugButton {
+					log.Printf("button release event: %+v", event)
+					continue
+				}
 			case gpio.Error:
+				if *debugButton {
+					log.Printf("button error event: %+v", event)
+					continue
+				}
 				err = event.Data.(error)
 				log.Fatalf("error event from button: %v (%+v)", err, event)
 			default:

@@ -2,6 +2,7 @@ package main
 
 var schema = `
 DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS devices;
 DROP TABLE IF EXISTS pills;
 DROP TABLE IF EXISTS dispensing_plans;
 DROP TABLE IF EXISTS dispense_schedule;
