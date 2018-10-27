@@ -73,11 +73,10 @@ type requestData struct {
 
 func blinkLed(led *gpio.LedDriver, times uint) {
 	for i := uint(0); i < times; i++ {
-		log.Println("led on")
 		_ = led.On()
 		time.Sleep(time.Second)
-		log.Println("led off")
 		_ = led.Off()
+		time.Sleep(time.Second)
 	}
 }
 
