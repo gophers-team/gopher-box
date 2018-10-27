@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -43,4 +42,4 @@ func sendEvent() error {
 	}
 	log.Printf("Response: %v", resp)
 	return nil
-},
+}
