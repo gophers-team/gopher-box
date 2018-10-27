@@ -52,6 +52,14 @@ func (t *tabletDispenser) Rotate() {
 	log.Printf("finished opening tablet dispenser for %s", t.tabletID)
 }
 
+func (t *tabletDispenser) DbgRotate() {
+	t.motor.SetSpeed(t.rpm)
+	err := t.motor.Move(t.step)
+	if err != nil {
+		log.Fatalf("dispenser for tablet %s move error: %v", t.tabletID, err)
+	}
+}
+
 type requestData struct {
 	requester        requester
 	deviceID         api.DeviceID
@@ -98,6 +106,7 @@ func main() {
 
 	work := func() {
 		go heartbeat(rd, *heartbeetInterval)
+		go rd.tabletDispensers[tid].DbgRotate()
 
 		err := tabletButton.Start()
 		if err != nil {
