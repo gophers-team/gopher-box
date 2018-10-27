@@ -55,7 +55,8 @@ func main() {
 	if *server {
 		r := mux.NewRouter()
 		r.HandleFunc("/", IndexHandler)
-		r.HandleFunc(api.DeviceDispenseEndpoint, DbHandler(db, deviceDispenseHandler)).Methods(http.MethodPost)
+		r.HandleFunc(api.DeviceDispenseEndpoint, DbHandler(db, dispenseHandler)).Methods(http.MethodPost)
+		r.HandleFunc(api.DeviceStatusEndpoint, DbHandler(db, statusHandler)).Methods(http.MethodPost)
 		r.HandleFunc(api.DeviceHeartbeatEndpoint, DbHandler(db, heartbeatHandler)).Methods(http.MethodPost)
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
 	}
