@@ -107,8 +107,7 @@ func main() {
 		buttonInited := false
 		for event := range tabletButtonEvents {
 			switch event.Name {
-			case gpio.ButtonPush: // skipping, acting on release
-			case gpio.ButtonRelease:
+			case gpio.ButtonPush: // skipping, acting on push
 				if buttonInited {
 					err = tabletButtonPush(rd)
 					if err != nil {
@@ -117,6 +116,7 @@ func main() {
 				} else {
 					buttonInited = true
 				}
+			case gpio.ButtonRelease:
 			case gpio.Error:
 				err = event.Data.(error)
 				log.Fatalf("error event from button: %v (%+v)", err, event)
