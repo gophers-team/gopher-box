@@ -202,7 +202,7 @@ func heartbeat(rd *requestData, interval time.Duration) {
 
 func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 	var (
-		s *api.DeviceTabletStatusResponse
+		s   *api.DeviceTabletStatusResponse
 		err error
 	)
 	if debugStatusOk {

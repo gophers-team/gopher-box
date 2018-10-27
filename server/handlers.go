@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -70,8 +69,6 @@ func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func deviceListHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
-	panic("!!")
-	fmt.Println("!!!")
 	infos := getDeviceInfos(db)
 	resp := api.DeviceListResponse(infos)
 	if err := json.NewEncoder(w).Encode(&resp); err != nil {
