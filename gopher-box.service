@@ -1,0 +1,10 @@
+[Unit]
+Description=Gopher box
+
+[Service]
+Type=simple
+ExecStartPre=-mkdir -p /var/lib/gopher-box
+ExecStartPre=-touch /var/lib/gopher-box/db
+ExecStart=/srv/gopher-box
+Restart=on-failure
+
