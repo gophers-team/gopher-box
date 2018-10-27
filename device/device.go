@@ -105,7 +105,14 @@ func main() {
 		}
 
 		tabletButtonEvents := tabletButton.Subscribe()
-		buttonInited := false
+		lastButtonEventTime := time.Now()
+		isDoubleEvent := func() bool {
+			t := time.Now()
+			ret := t.Sub(lastButtonEventTime) < 100*time.Millisecond
+			lastButtonEventTime = t
+			return ret
+		}
+
 		for event := range tabletButtonEvents {
 			switch event.Name {
 			case gpio.ButtonPush: // skipping, acting on push
@@ -113,17 +120,20 @@ func main() {
 					log.Printf("button push event: %+v", event)
 					continue
 				}
-				if buttonInited {
-					err = tabletButtonPush(rd)
-					if err != nil {
-						log.Fatalf("error processing button push: %v", err)
-					}
-				} else {
-					buttonInited = true
+				if isDoubleEvent() {
+					continue
 				}
+				err = tabletButtonPush(rd)
+				if err != nil {
+					log.Fatalf("error processing button push: %v", err)
+				}
+
 			case gpio.ButtonRelease:
 				if *debugButton {
 					log.Printf("button release event: %+v", event)
+					continue
+				}
+				if isDoubleEvent() {
 					continue
 				}
 			case gpio.Error:
