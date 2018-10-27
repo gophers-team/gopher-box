@@ -17,17 +17,17 @@ type DeviceTabletStatusRequest struct {
 }
 
 type TabletID string
-type TableAmount uint8
+type TabletAmount uint8
 
 type DeviceTabletStatusResponse struct {
-	Tablets map[TabletID]TableAmount `json:"tablets"`
-	OperationID OperationID `json:"operation_id"`
+	Tablets map[TabletID]TabletAmount `json:"tablets"`
+	OperationID OperationID           `json:"operation_id"`
 }
 
 var DeviceDispenseEndpoint = "/dispense"
 
 type DeviceTabletDispenseRequest struct {
 	DeviceID    DeviceID    `json:"device_id"`
-	Fulfillment map[TabletID]TableAmount
+	Fulfillment map[TabletID]TabletAmount
 	OperationID OperationID `json:"operation_id"`
 }
