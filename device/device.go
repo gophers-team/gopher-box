@@ -54,9 +54,11 @@ func (t *tabletDispenser) Rotate() {
 
 func (t *tabletDispenser) DbgRotate() {
 	t.motor.SetSpeed(t.rpm)
-	err := t.motor.Move(t.step)
-	if err != nil {
-		log.Fatalf("dispenser for tablet %s move error: %v", t.tabletID, err)
+	for {
+		err := t.motor.Move(t.step)
+		if err != nil {
+			log.Fatalf("dispenser for tablet %s move error: %v", t.tabletID, err)
+		}
 	}
 }
 
