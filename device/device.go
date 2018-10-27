@@ -136,7 +136,7 @@ func main() {
 
 		for event := range tabletButtonEvents {
 			switch event.Name {
-			case gpio.ButtonPush: // skipping, acting on push
+			case gpio.ButtonPush:
 				if isDoubleEvent() {
 					continue
 				}
@@ -155,7 +155,7 @@ func main() {
 					}
 				}()
 
-			case gpio.ButtonRelease:
+			case gpio.ButtonRelease: // skipping, acting on push
 				if isDoubleEvent() {
 					continue
 				}
