@@ -12,7 +12,7 @@
   </head>
   <body>
       <div class="container">
-<h1>Cure Box</h1>
+          <h1 class="navbar-left alert "><img width="80" src="logo.jpg"> Cure Box</h1>
     <table id="devices" class="table">
       <thead>
         <tr>
@@ -36,27 +36,21 @@
     <script type="text/javascript" charset="UTF-8">
 $(document).ready(function(){
     setInterval(function(){
-        var data = [
-            {"device_id":1,"name": "mydevice", "status":"online"},
-            {"device_id":2,"name": "myvice", "status":"offline"},
-            {"device_id":3,"name": "mye", "status":"online"},
-         ];
-        var devices = $('#devices tbody');
-        devices.empty();
-        data.forEach(function(el) {
-            devices.append('<tr>');
-            devices.append('<td>' + el['device_id'] + '</td>');
-            devices.append('<td>' + el['name'] + '</td>');
-            if (el['status'] == 'online') {
-                devices.append('<td class="text-success">online</td>');
-            } else {
-                devices.append('<td class="text-danger">offline</td>');
-            }
-            devices.append('</tr>');
+        $.getJSON('/device', function(data){
+            var devices = $('#devices tbody');
+            devices.empty();
+            data.forEach(function(el) {
+                devices.append('<tr>');
+                devices.append('<td>' + el['device_id'] + '</td>');
+                devices.append('<td>' + el['name'] + '</td>');
+                if (el['status'] == 'online') {
+                    devices.append('<td class="text-success">online</td>');
+                } else {
+                    devices.append('<td class="text-danger">offline</td>');
+                }
+                devices.append('</tr>');
+            });
         });
-//        $.getJSON('/device', function(data){
-//            console.log('OK', data);
-//        });
     }, 1000);
 });
     </script>
