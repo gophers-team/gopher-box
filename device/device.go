@@ -73,8 +73,10 @@ type requestData struct {
 
 func blinkLed(led *gpio.LedDriver, times uint) {
 	for i := uint(0); i < times; i++ {
+		log.Println("led on")
 		_ = led.On()
 		time.Sleep(time.Second)
+		log.Println("led off")
 		_ = led.Off()
 	}
 }
@@ -149,11 +151,15 @@ func main() {
 		err = ledStatusOk.Start()
 		if err != nil {
 			log.Println("failed to start ok led:", err)
+		} else {
+			_ = ledStatusOk.Off()
 		}
 
 		err = ledStatusFail.Start()
 		if err != nil {
 			log.Println("failed to start fail led:", err)
+		} else {
+			_ = ledStatusFail.Off()
 		}
 
 		tabletButtonEvents := tabletButton.Subscribe()
