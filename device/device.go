@@ -124,7 +124,7 @@ func main() {
 
 	robot := gobot.NewRobot("bot",
 		[]gobot.Connection{firmataAdaptor},
-		[]gobot.Device{motor},
+		[]gobot.Device{motor, tabletButton},
 		work,
 	)
 
