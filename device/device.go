@@ -85,9 +85,9 @@ func main() {
 	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.Int("device-id", 1, "the (unique) id of the device")
-	tabletID := flag.String("tablet-id", "0", "tablet id (type of tablets)")
+	tabletID := flag.String("tablet-id", "red", "tablet id (type of tablets)")
 	debugButton := flag.Bool("debug-button", false, "debug button events")
-	debugRotate := flag.Bool("debug-rotate", false, "debug always rotatig mode")
+	debugRotate := flag.Bool("debug-rotate", false, "debug always rotating mode")
 	debugStatusOk := flag.Bool("debug-status", false, "debug status with always one tablet")
 	flag.Parse()
 
