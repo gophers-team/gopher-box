@@ -189,7 +189,7 @@ func main() {
 					defer atomic.StoreUint32(&inButtonHandler, 0)
 					err = tabletButtonPush(rd, *debugStatusOk)
 					if err != nil {
-						log.Fatalf("error processing button push: %v", err)
+						log.Println("error processing button push: %v", err)
 					}
 				}()
 
@@ -269,6 +269,9 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 		if amount != 0 {
 			go rd.BlinkOkLed(uint(amount))
 			res, err = dispenseTablet(rd, t, amount)
+			if err != nil {
+				rd.BlinkFailLed(3)
+			}
 		} else {
 			rd.BlinkFailLed(1)
 		}
