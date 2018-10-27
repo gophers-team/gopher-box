@@ -105,23 +105,33 @@ func main() {
 		}
 
 		tabletButtonEvents := tabletButton.Subscribe()
-		buttonInited := false
+		lastButtonEventTime := time.Now()
+		isDoubleEvent := func() bool {
+			t := time.Now()
+			ret := t.Sub(lastButtonEventTime) < 100*time.Millisecond
+			lastButtonEventTime = t
+			return ret
+		}
+
 		for event := range tabletButtonEvents {
 			switch event.Name {
 			case gpio.ButtonPush: // skipping, acting on push
+				if isDoubleEvent() {
+					continue
+				}
 				if *debugButton {
 					log.Printf("button push event: %+v", event)
 					continue
 				}
-				if buttonInited {
-					err = tabletButtonPush(rd)
-					if err != nil {
-						log.Fatalf("error processing button push: %v", err)
-					}
-				} else {
-					buttonInited = true
+				err = tabletButtonPush(rd)
+				if err != nil {
+					log.Fatalf("error processing button push: %v", err)
 				}
+
 			case gpio.ButtonRelease:
+				if isDoubleEvent() {
+					continue
+				}
 				if *debugButton {
 					log.Printf("button release event: %+v", event)
 					continue
@@ -158,10 +168,7 @@ func heartbeat(rd *requestData, interval time.Duration) {
 	defer t.Stop()
 	for {
 		<-t.C
-		_, err := rd.requester.PostJson(api.DeviceHeartbeatEndpoint, &heartbeat)
-		if err != nil {
-			continue
-		}
+		_, _ = rd.requester.PostJson(api.DeviceHeartbeatEndpoint, &heartbeat)
 		t.Reset(interval)
 	}
 }
@@ -246,7 +253,7 @@ func (h *httpRequester) PostJson(endpoint string, val interface{}) (*http.Respon
 		return nil, fmt.Errorf("request to %s failed: %v", url, err)
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close()
 		data, readErr := ioutil.ReadAll(resp.Body)
 		if readErr != nil {
