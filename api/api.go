@@ -25,6 +25,6 @@ type DeviceTabletStatusResponse struct {
 var DeviceDispenseEndpoint = "/dispense"
 
 type DeviceTabletDispenseRequest struct {
-	DeviceID DeviceID `json:"device_id"`
-	Fullfilled bool `json:"fullfilled"`
+	DeviceID  DeviceID `json:"device_id"`
+	Fulfilled bool     `json:"fulfilled"`
 }
