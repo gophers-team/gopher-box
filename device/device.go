@@ -67,6 +67,24 @@ type requestData struct {
 	requester        requester
 	deviceID         api.DeviceID
 	tabletDispensers map[api.TabletID]*tabletDispenser
+	statusOkLed      *gpio.LedDriver
+	statusFailLed    *gpio.LedDriver
+}
+
+func blinkLed(led *gpio.LedDriver, times uint) {
+	for i := uint(0); i < times; i++ {
+		_ = led.On()
+		time.Sleep(time.Second)
+		_ = led.Off()
+	}
+}
+
+func (rd *requestData) BlinkOkLed(times uint) {
+	blinkLed(rd.statusOkLed, times)
+}
+
+func (rd *requestData) BlinkOffLed(times uint) {
+	blinkLed(rd.statusFailLed, times)
 }
 
 var globalTabletID api.TabletID // for dbg purposes only
@@ -86,6 +104,8 @@ func main() {
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.Int("device-id", 1, "the (unique) id of the device")
 	tabletID := flag.String("tablet-id", "red", "tablet id (type of tablets)")
+	statusOkLedPin := flag.String("led-ok", "6", `pin of "status ok" led`)
+	statusFailLedPin := flag.String("led-fail", "7", `pin of "status ok" led`)
 	debugButton := flag.Bool("debug-button", false, "debug button events")
 	debugRotate := flag.Bool("debug-rotate", false, "debug always rotating mode")
 	debugStatusOk := flag.Bool("debug-status", false, "debug status with always one tablet")
@@ -96,6 +116,8 @@ func main() {
 	firmataAdaptor := firmata.NewAdaptor(*tty)
 	motor := gpio.NewStepperDriver(firmataAdaptor, pins, gpio.StepperModes.SinglePhaseStepping, *stepsPerRev)
 	tabletButton := gpio.NewButtonDriver(firmataAdaptor, *tabletButtonPin, *tabletButtonPollInterval)
+	ledStatusOk := gpio.NewLedDriver(firmataAdaptor, *statusOkLedPin)
+	ledStatusFail := gpio.NewLedDriver(firmataAdaptor, *statusFailLedPin)
 
 	requester := httpRequester{
 		server: *server,
@@ -108,6 +130,8 @@ func main() {
 		tabletDispensers: map[api.TabletID]*tabletDispenser{
 			tid: newTabletDispenser(motor, tid, *rpm, *step),
 		},
+		statusOkLed:   ledStatusOk,
+		statusFailLed: ledStatusFail,
 	}
 
 	log.Printf("ready to start work: %+v", *rd)
@@ -121,6 +145,15 @@ func main() {
 		err := tabletButton.Start()
 		if err != nil {
 			log.Fatalf("failed to start tablet button: %v", err)
+		}
+		err = ledStatusOk.Start()
+		if err != nil {
+			log.Println("failed to start ok led:", err)
+		}
+
+		err = ledStatusFail.Start()
+		if err != nil {
+			log.Println("failed to start fail led:", err)
 		}
 
 		tabletButtonEvents := tabletButton.Subscribe()
@@ -180,7 +213,7 @@ func main() {
 
 	robot := gobot.NewRobot("bot",
 		[]gobot.Connection{firmataAdaptor},
-		[]gobot.Device{motor, tabletButton},
+		[]gobot.Device{motor, tabletButton, ledStatusOk, ledStatusFail},
 		work,
 	)
 
@@ -217,6 +250,7 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 	}
 	if err != nil {
 		// TODO: it'll be nice to notify user that the server is down
+		go rd.BlinkOffLed(1)
 		return err
 	}
 
@@ -229,6 +263,7 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 	for t, amount := range s.Tablets {
 		res := api.TabletAmount(0)
 		if amount != 0 {
+			go rd.BlinkOkLed(uint(amount))
 			res, err = dispenseTablet(rd, t, amount)
 		}
 		resp.Fulfillment[t] = res
