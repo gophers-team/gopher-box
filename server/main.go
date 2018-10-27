@@ -16,6 +16,7 @@ func main() {
 	dbFile := flag.String("db-file", "/var/lib/gopher-box/events.db", "database file path")
 
 	server := flag.Bool("server", false, "start server")
+	static := flag.String("static", "static", "static files dir")
 	port := flag.Int("port", 80, "server's port")
 
 	showPlans := flag.Bool("show-plans", false, "show plans")
@@ -54,10 +55,12 @@ func main() {
 	}
 	if *server {
 		r := mux.NewRouter()
-		r.HandleFunc("/", IndexHandler)
+
+		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(*static))))
 		r.HandleFunc(api.DeviceDispenseEndpoint, DbHandler(db, dispenseHandler)).Methods(http.MethodPost)
 		r.HandleFunc(api.DeviceStatusEndpoint, DbHandler(db, statusHandler)).Methods(http.MethodPost)
 		r.HandleFunc(api.DeviceHeartbeatEndpoint, DbHandler(db, heartbeatHandler)).Methods(http.MethodPost)
+
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
 	}
 }
