@@ -44,6 +44,6 @@ type Event struct {
 }
 
 func InitDb() (*sqlx.DB, error) {
- 	db, err := sqlx.Connect("sqlite", DbFile)
+ 	db, err := sqlx.Connect("sqlite3", DbFile)
  	return db, err
 }

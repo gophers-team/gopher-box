@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func DbHandler(db *sqlx.DB, handler func(db *sqlx.DB, w http.ResponseWriter, r * http.Request)) http.HandlerFunc {
@@ -21,14 +23,15 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func EventsHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-
+	if r.Method == http.MethodPost {
+		tx := db.MustBegin()
+		tx.MustExec("INSERT INTO events (type, created_at) VALUES ($1, $2)", "Heartbeat", time.Now())
+		tx.Commit()
 	}
 	vars := mux.Vars(r)
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "VARS: %v\n", vars)
 }
-
 
 func main() {
 	db, err := InitDb()
@@ -41,5 +44,5 @@ func main() {
 	r.HandleFunc("/", IndexHandler)
 	r.HandleFunc("/events", DbHandler(db, EventsHandler)).Methods(http.MethodGet, http.MethodPost)
 
-	log.Fatal(http.ListenAndServe(":80", r))
+	log.Fatal(http.ListenAndServe(":8000", r))
 }
