@@ -1,4 +1,4 @@
-curl -X POST http://127.0.0.1:8000/heartbeat \
+curl -v -X POST http://127.0.0.1:8000/heartbeat \
     -H "Contenty-Type: application/json" \
     -d '{"device_id": 1}' 
 

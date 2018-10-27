@@ -66,7 +66,7 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 	}
 	for rows.Next() {
 		var deviceInfo api.DeviceInfo
-		var createdAt time.Time
+		var createdAt []uint8
 		err := rows.Scan(&deviceInfo.DeviceID, &createdAt)
 		if err != nil {
 			log.Fatal(err)

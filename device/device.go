@@ -84,7 +84,7 @@ func main() {
 	rpm := flag.Uint("rpm", 10, "rpm speed")
 	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
-	deviceID := flag.Int("device-id", 1337, "the (unique) id of the device")
+	deviceID := flag.Int("device-id", 1, "the (unique) id of the device")
 	tabletID := flag.String("tablet-id", "0", "tablet id (type of tablets)")
 	debugButton := flag.Bool("debug-button", false, "debug button events")
 	debugRotate := flag.Bool("debug-rotate", false, "debug always rotatig mode")
@@ -202,7 +202,7 @@ func heartbeat(rd *requestData, interval time.Duration) {
 
 func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 	var (
-		s *api.DeviceTabletStatusResponse
+		s   *api.DeviceTabletStatusResponse
 		err error
 	)
 	if debugStatusOk {
@@ -289,8 +289,9 @@ func (h *httpRequester) PostJson(endpoint string, val interface{}) (*http.Respon
 	log.Printf("sending request to %s", url)
 	resp, err := http.Post(url, "application/json", body)
 	if err != nil {
-		log.Printf("request to %s failed: %v", endpoint, err)
-		return nil, fmt.Errorf("request to %s failed: %v", url, err)
+		errText := fmt.Sprintf("request to %s failed: %v", url, err)
+		log.Println(errText)
+		return nil, errors.New(errText)
 	}
 
 	if resp.StatusCode != http.StatusOK {
