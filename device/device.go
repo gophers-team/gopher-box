@@ -141,10 +141,12 @@ func main() {
 					log.Printf("button push event: %+v", event)
 					continue
 				}
-				err = tabletButtonPush(rd, *debugStatusOk)
-				if err != nil {
-					log.Fatalf("error processing button push: %v", err)
-				}
+				go func() {
+					err = tabletButtonPush(rd, *debugStatusOk)
+					if err != nil {
+						log.Fatalf("error processing button push: %v", err)
+					}
+				}()
 
 			case gpio.ButtonRelease:
 				if isDoubleEvent() {
