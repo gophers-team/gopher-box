@@ -1,4 +1,4 @@
-.PHONY: build build_device build_main build_main_local deploy
+.PHONY: build build_device build_main build_main_local deploy deploy_device
 
 build_device:
 	GOARCH=arm64 GOOS=linux go build -o ./build/device ./device
@@ -15,3 +15,5 @@ deploy: build_main
 	scp ./scripts/deploy.sh 130.193.56.206:/tmp/deploy.sh
 	scp ./build/gopher-box 130.193.56.206:/tmp/gopher-box
 
+deploy_device: build_device
+	scp -C ./build/device linaro@172.31.19.157:
