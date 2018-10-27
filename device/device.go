@@ -168,10 +168,7 @@ func heartbeat(rd *requestData, interval time.Duration) {
 	defer t.Stop()
 	for {
 		<-t.C
-		_, err := rd.requester.PostJson(api.DeviceHeartbeatEndpoint, &heartbeat)
-		if err != nil {
-			continue
-		}
+		_, _ = rd.requester.PostJson(api.DeviceHeartbeatEndpoint, &heartbeat)
 		t.Reset(interval)
 	}
 }
