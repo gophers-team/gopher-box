@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	tty := flag.String("tty", "/dev/ttyACM0", "arduino tty")
+	tty := flag.String("tty", "/dev/ttyMSM1", "arduino tty")
 	in1 := flag.String("in1", "8", "in1")
 	in2 := flag.String("in2", "9", "in2")
 	in3 := flag.String("in3", "10", "in3")
