@@ -1,0 +1,18 @@
+Dear Future Us!
+
+We've designed the device<->server api and started implementing it.
+Device should work like this:
+* it'll have a constant hearbeat process with periodic requests
+* it'll make a request "how much tablets of each kind should I dispense?" when the user pushes the button "give me tablets"
+* it'll report the dispense operation status
+
+server should track devices by their ids and have a timetable for each device and for each tablet type
+
+So, some work to do:
+* implement server handling events, devices, users, notifications
+* implement web interface for current statuses
+* implement device logic
+* implement device hardware
+? maybe implement mobile applications
+
+Btw, Volodya has taken the hardware with himself, so the last point is not 100% relevant
