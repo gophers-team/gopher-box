@@ -278,6 +278,22 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 		resp.Fulfillment[t] = res
 	}
 
+	dispenseResp, err := rd.requester.PostJson(api.DeviceDispenseEndpoint, &resp)
+	if err != nil {
+		log.Println("error requesting dispense:", err)
+		rd.BlinkFailLed(4)
+		return err
+	}
+
+	defer dispenseResp.Body.Close()
+	_, err = ioutil.ReadAll(dispenseResp.Body)
+	if err != nil {
+		errText := fmt.Sprintf("error reading dispense response: %v", err)
+		log.Println(errText)
+		rd.BlinkFailLed(4)
+		return errors.New(errText)
+	}
+
 	return nil
 }
 
