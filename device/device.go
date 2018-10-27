@@ -79,7 +79,7 @@ func main() {
 	tabletButtonPin := flag.String("tablet-button-pin", "12", `pin of "give me tablets!" button`)
 	tabletButtonPollInterval := flag.Duration("tablet-button-poll-interval", 10*time.Millisecond, `poll interval of "give me tablets!" button`)
 	stepsPerRev := flag.Uint("steps-per-rev", 2038, "steps per rev")
-	step := flag.Int("step", 2038, "step")
+	step := flag.Int("step", -2038, "step")
 	rpm := flag.Uint("rpm", 10, "rpm speed")
 	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
