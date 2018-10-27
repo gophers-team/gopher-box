@@ -19,6 +19,7 @@
           <th scope="col">#</th>
           <th scope="col">Name</th>
           <th scope="col">Status</th>
+          <th scope="col">Info</th>
         </tr>
       </thead>
       <tbody>
@@ -48,6 +49,7 @@ $(document).ready(function(){
                 } else {
                     devices.append('<td class="text-danger">offline</td>');
                 }
+                devices.append('<td class="bg-light">' + el['info'] + '</td>');
                 devices.append('</tr>');
             });
         });
