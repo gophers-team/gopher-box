@@ -54,8 +54,8 @@ func InitDb(dbFile string, devel bool) (*sqlx.DB, error) {
 			"postgres",
 			"host=127.0.0.1 port=5432 user=box password=box dbname=box sslmode=disable",
 		)
-		db.DB.SetMaxIdleConns(2)
-		db.DB.SetMaxOpenConns(2)
+		db.DB.SetMaxIdleConns(10)
+		db.DB.SetMaxOpenConns(10)
 	}
 	return db, err
 }

@@ -1,13 +1,6 @@
 package main
 
 var schema = `
-DROP TABLE IF EXISTS pills;
-DROP TABLE IF EXISTS devices;
-DROP TABLE IF EXISTS heartbeats;
-DROP TABLE IF EXISTS device_dispensings;
-DROP TABLE IF EXISTS dispensing_plans;
-DROP TABLE IF EXISTS dispensing_schedule;
-
 CREATE TABLE dispensing_plans (
     id          SERIAL PRIMARY KEY,
 	name 		VARCHAR(255) NOT NULL,
@@ -28,7 +21,8 @@ CREATE TABLE pills (
 );
 
 CREATE TABLE heartbeats (
-    device_id   INTEGER NOT NULL,
+	id          SERIAL PRIMARY KEY,
+    device_id   INTEGER REFERENCES devices(id),
     created_at  TIMESTAMP NOT NULL
 );
 
@@ -52,3 +46,11 @@ CREATE TABLE device_dispensings (
     created_at  	TIMESTAMP
 );
 `
+/*
+DROP TABLE IF EXISTS pills;
+DROP TABLE IF EXISTS devices;
+DROP TABLE IF EXISTS heartbeats;
+DROP TABLE IF EXISTS device_dispensings;
+DROP TABLE IF EXISTS dispensing_plans;
+DROP TABLE IF EXISTS dispensing_schedule;
+ */
