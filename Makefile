@@ -1,8 +1,7 @@
-.PHONY: build build_device build_main deploy
+.PHONY: build build_device build_main build_main_local deploy
 
 build_device:
 	GOARCH=arm64 GOOS=linux go build -o ./build/device ./device
-
 
 build_main:
 	GOARCH=amd64 GOOS=linux go build -o ./build/gopher-box ./server
