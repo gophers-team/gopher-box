@@ -270,6 +270,8 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 		if amount != 0 {
 			go rd.BlinkOkLed(uint(amount))
 			res, err = dispenseTablet(rd, t, amount)
+		} else {
+			rd.BlinkFailLed(1)
 		}
 		resp.Fulfillment[t] = res
 	}
