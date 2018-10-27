@@ -22,5 +22,8 @@ INSERT INTO dispensing_schedule VALUES
 
 ------------------------------------------------------------------
 -- Devices
-INSERT INTO devices
-VALUES(1, 1, "gopher-box", CURRENT_TIMESTAMP)
+INSERT INTO devices VALUES
+(1, 1, "Gomer Simpson's device", CURRENT_TIMESTAMP),
+(2, 1, "Rick Sanchez", CURRENT_TIMESTAMP),
+(3, 1, "Finn the human", CURRENT_TIMESTAMP),
+(4, 1, "Avocato", CURRENT_TIMESTAMP),

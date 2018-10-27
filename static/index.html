@@ -13,36 +13,18 @@
   <body>
       <div class="container">
 <h1>Cure Box</h1>
-    <table class="table">
+    <table id="devices" class="table">
       <thead>
         <tr>
           <th scope="col">#</th>
-          <th scope="col">First</th>
-          <th scope="col">Last</th>
-          <th scope="col">Handle</th>
+          <th scope="col">Name</th>
+          <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <th scope="row">1</th>
-          <td>Mark</td>
-          <td>Otto</td>
-          <td>@mdo</td>
-        </tr>
-        <tr>
-          <th scope="row">2</th>
-          <td>Jacob</td>
-          <td>Thornton</td>
-          <td>@fat</td>
-        </tr>
-        <tr>
-          <th scope="row">3</th>
-          <td>Larry</td>
-          <td>the Bird</td>
-          <td>@twitter</td>
-        </tr>
       </tbody>
     </table>
+
       </div>
 
     <!-- Optional JavaScript -->
@@ -54,9 +36,27 @@
     <script type="text/javascript" charset="UTF-8">
 $(document).ready(function(){
     setInterval(function(){
-        $.getJSON('/device', function(data){
-            console.log('OK', data);
+        var data = [
+            {"device_id":1,"name": "mydevice", "status":"online"},
+            {"device_id":2,"name": "myvice", "status":"offline"},
+            {"device_id":3,"name": "mye", "status":"online"},
+         ];
+        var devices = $('#devices tbody');
+        devices.empty();
+        data.forEach(function(el) {
+            devices.append('<tr>');
+            devices.append('<td>' + el['device_id'] + '</td>');
+            devices.append('<td>' + el['name'] + '</td>');
+            if (el['status'] == 'online') {
+                devices.append('<td class="text-success">online</td>');
+            } else {
+                devices.append('<td class="text-danger">online</td>');
+            }
+            devices.append('</tr>');
         });
+//        $.getJSON('/device', function(data){
+//            console.log('OK', data);
+//        });
     }, 1000);
 });
     </script>
