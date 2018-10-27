@@ -54,3 +54,25 @@ func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pil
 	pills, err = getPills(db, deviceID)
 	return operationID, pills, err
 }
+
+func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
+	var infos []api.DeviceInfo
+	tx := db.MustBegin()
+	rows, err := tx.Queryx(
+		`SELECT device_id, MAX(created_at) FROM heartbeats GROUP BY device_id;`,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var deviceInfo api.DeviceInfo
+		var createdAt time.Time
+		err := rows.Scan(&deviceInfo.DeviceID, &createdAt)
+		if err != nil {
+			log.Fatal(err)
+		}
+		deviceInfo.Status = api.DeviceStatusOnline
+		infos = append(infos, deviceInfo)
+	}
+	return infos
+}
