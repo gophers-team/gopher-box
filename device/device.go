@@ -101,7 +101,7 @@ func main() {
 	stepsPerRev := flag.Uint("steps-per-rev", 2038, "steps per rev")
 	step := flag.Int("step", -2038, "step")
 	rpm := flag.Uint("rpm", 10, "rpm speed")
-	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
+	heartbeetInterval := flag.Duration("heartbeat-interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.Int("device-id", 1, "the (unique) id of the device")
 	tabletID := flag.String("tablet-id", "red", "tablet id (type of tablets)")
