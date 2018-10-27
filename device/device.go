@@ -167,7 +167,9 @@ func heartbeat(rd *requestData, interval time.Duration) {
 	t := time.NewTimer(0)
 	defer t.Stop()
 	for {
+		log.Println("dbg: waiting for heartbeat timer")
 		<-t.C
+		log.Println("dbg: making heartbeat request")
 		_, _ = rd.requester.PostJson(api.DeviceHeartbeatEndpoint, &heartbeat)
 		t.Reset(interval)
 	}
