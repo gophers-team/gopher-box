@@ -2,7 +2,7 @@ package api
 
 type DeviceID int
 type EventType string
-type OperationID string
+type OperationID int64
 
 var DeviceHeartbeatEndpoint = "/heartbeat"
 

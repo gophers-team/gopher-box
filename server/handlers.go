@@ -2,9 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/gophers-team/gopher-box/api"
 	"github.com/jmoiron/sqlx"
@@ -21,13 +20,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("GopherBox!\n"))
 }
 
-var heartbeatQuery = `
-INSERT INTO heartbeats (
-	device_id,
-	created_at
-)
-VALUES ($1, $2)`
-
 func heartbeatHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 	var h api.DeviceHeartbeat
 	if err := json.NewDecoder(r.Body).Decode(&h); err != nil {
@@ -35,11 +27,7 @@ func heartbeatHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed to unmarshal /heartbeat request"))
 		return
 	}
-
-	tx := db.MustBegin()
-	tx.MustExec(heartbeatQuery, h.DeviceID, time.Now())
-	tx.Commit()
-
+	saveHeartbeat(db, h.DeviceID)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -61,7 +49,20 @@ func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed to unmarshal /status request"))
 		return
 	}
+	operationID, err := dispensingBegin(db, s.DeviceID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed begin dispensing"))
+		return
+	}
 
-	fmt.Println(s)
+	resp := api.DeviceTabletStatusResponse{
+		OperationID: api.OperationID(operationID),
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Panic(err)
+	}
 }

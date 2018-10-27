@@ -8,20 +8,26 @@ DROP TABLE IF EXISTS device_dispensings;
 DROP TABLE IF EXISTS dispensing_plans;
 DROP TABLE IF EXISTS dispensing_schedule;
 
+CREATE TABLE dispensing_plans (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	name 		VARCHAR(255) NOT NULL,
+    created_at  DATETIME
+);
+
 CREATE TABLE devices (
     id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	plan_id    	INTEGER NOT NULL,
 	name 		VARCHAR(255) NOT NULL,
     created_at  DATETIME,
-	FOREIGN KEY (plan_id) REFERENCES plans(id)
+	FOREIGN KEY (plan_id) REFERENCES dispensing_plans(id)
 );
 
 CREATE TABLE device_dispensings (
 	id          	INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     device_id     	INTEGER NOT NULL,
-    operation_id	INTEGER NOT NULL,
 	schedule_id		INTEGER,
 	pills_dispensed	INTEGER,
+	status 			VARCHAR(255) NOT NULL,
     created_at  	DATETIME,
 	FOREIGN KEY (device_id) REFERENCES devices(id)
 	FOREIGN KEY (schedule_id) REFERENCES dispensing_schedule(id)
@@ -33,15 +39,9 @@ CREATE TABLE pills (
     created_at  DATETIME
 );
 
-CREATE TABLE dispensing_plans (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-	name 		VARCHAR(255) NOT NULL,
-    created_at  DATETIME
-);
-
 CREATE TABLE heartbeats (
     device_id   INTEGER NOT NULL,
-    created_at  DATETIME NOT NULL,
+    created_at  DATETIME NOT NULL
 );
 
 CREATE TABLE dispensing_schedule (
