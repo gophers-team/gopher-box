@@ -76,3 +76,15 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 	}
 	return infos
 }
+
+func dispensingEnd(db *sqlx.DB, operationID api.OperationID) (err error) {
+	tx := db.MustBegin()
+	tx.MustExec(`
+		UPDATE device_dispensings
+		SET status = $1
+		WHERE operation_id = $3
+	`, operationID, "finished")
+	err = tx.Commit()
+
+	return err
+}
