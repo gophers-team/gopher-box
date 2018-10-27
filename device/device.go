@@ -21,9 +21,40 @@ type requester interface {
 	PostJson(endpoint string, val interface{}) (*http.Response, error)
 }
 
+type tabletDispenser struct {
+	motor    *gpio.StepperDriver
+	tabletID api.TabletID
+	rpm      uint
+	step     int
+}
+
+func newTabletDispenser(motor *gpio.StepperDriver, tabletID api.TabletID, rpm uint, step int) *tabletDispenser {
+	return &tabletDispenser{
+		motor:    motor,
+		tabletID: tabletID,
+		rpm:      rpm,
+		step:     step,
+	}
+}
+
+// TODO: will have to add time and stop event for this and Close
+func (t *tabletDispenser) Rotate() {
+	log.Printf("started opening tablet dispenser for %s", t.tabletID)
+
+	t.motor.SetSpeed(t.rpm)
+	err := t.motor.Move(t.step)
+	if err != nil {
+		log.Fatalf("dispenser for tablet %s move error: %v", t.tabletID, err)
+	}
+	time.Sleep(time.Second)
+	t.motor.SetSpeed(0)
+	log.Printf("finished opening tablet dispenser for %s", t.tabletID)
+}
+
 type requestData struct {
-	requester requester
-	deviceID  api.DeviceID
+	requester        requester
+	deviceID         api.DeviceID
+	tabletDispensers map[api.TabletID]*tabletDispenser
 }
 
 func main() {
@@ -32,40 +63,63 @@ func main() {
 	in2 := flag.String("in2", "9", "in2")
 	in3 := flag.String("in3", "10", "in3")
 	in4 := flag.String("in4", "11", "in4")
+	tabletButtonPin := flag.String("tablet-button-pin", "12", `pin of "give me tablets!" button`)
+	tabletButtonPollInterval := flag.Duration("tablet-button-poll-interval", 10*time.Millisecond, `poll interval of "give me tablets!" button`)
 	stepsPerRev := flag.Uint("steps-per-rev", 2038, "steps per rev")
 	step := flag.Int("step", 2038, "step")
 	rpm := flag.Uint("rpm", 10, "rpm speed")
-	revRpm := flag.Uint("rev-rpm", 10, "rev rpm speed")
-	heartbeetInterval := flag.Duration("heartbeet interval", 10*time.Second, "interval between heartbeets")
+	heartbeetInterval := flag.Duration("heartbeat interval", 10*time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.String("device-id", "gophers-device-1337", "the (unique) name of the device")
+	tabletID := flag.String("tablet-id", "0", "tablet id (type of tablets)")
 	flag.Parse()
 
 	pins := [...]string{*in1, *in2, *in3, *in4}
 
 	firmataAdaptor := firmata.NewAdaptor(*tty)
 	motor := gpio.NewStepperDriver(firmataAdaptor, pins, gpio.StepperModes.SinglePhaseStepping, *stepsPerRev)
+	tabletButton := gpio.NewButtonDriver(firmataAdaptor, *tabletButtonPin, *tabletButtonPollInterval)
 
 	requester := httpRequester{
 		server: *server,
 	}
+	tid := api.TabletID(*tabletID)
 	rd := &requestData{
 		requester: &requester,
-		deviceID: api.DeviceID(*deviceID),
+		deviceID:  api.DeviceID(*deviceID),
+		tabletDispensers: map[api.TabletID]*tabletDispenser{
+			tid: newTabletDispenser(motor, tid, *rpm, *step),
+		},
 	}
 
+	log.Printf("ready to start work: %+v", *rd)
+
 	work := func() {
-		go heartbeet(rd, *heartbeetInterval)
-		for {
-			motor.SetSpeed(*rpm)
-			err := motor.Move(*step)
-			if err != nil {
-				log.Printf("move error: %v", err)
-			}
-			time.Sleep(time.Second)
-			motor.SetSpeed(*revRpm)
-			motor.Move(-*step)
+		go heartbeat(rd, *heartbeetInterval)
+
+		err := tabletButton.Start()
+		if err != nil {
+			log.Fatalf("failed to start tablet button: %v", err)
 		}
+
+		tabletButtonEvents := tabletButton.Subscribe()
+		for event := range tabletButtonEvents {
+			switch event.Name {
+			case gpio.ButtonPush: // skipping, acting on release
+			case gpio.ButtonRelease:
+				err = tabletButtonPush(rd)
+				if err != nil {
+					log.Fatalf("error processing button push: %v", err)
+				}
+			case gpio.Error:
+				err = event.Data.(error)
+				log.Fatalf("error event from button: %v (%+v)", err, event)
+			default:
+				log.Fatalf("got unexpected event from button: %+v", event)
+			}
+		}
+
+		log.Println("worker loop finished")
 	}
 
 	robot := gobot.NewRobot("bot",
@@ -77,7 +131,7 @@ func main() {
 	robot.Start()
 }
 
-func heartbeet(rd *requestData, interval time.Duration) {
+func heartbeat(rd *requestData, interval time.Duration) {
 	heartbeat := api.DeviceHeartbeat{
 		DeviceID: rd.deviceID,
 	}
@@ -91,6 +145,68 @@ func heartbeet(rd *requestData, interval time.Duration) {
 		}
 		t.Reset(interval)
 	}
+}
+
+func tabletButtonPush(rd *requestData) error {
+	s, err := status(rd)
+	if err != nil {
+		// TODO: it'll be nice to notify user that the server is down
+		return err
+	}
+
+	resp := api.DeviceTabletDispenseRequest{
+		DeviceID:    rd.deviceID,
+		Fulfillment: make(map[api.TabletID]api.TabletAmount, len(s.Tablets)),
+		OperationID: s.OperationID,
+	}
+
+	for t, amount := range s.Tablets {
+		res := api.TabletAmount(0)
+		if amount != 0 {
+			res, err = dispenseTablet(rd, t, amount)
+		}
+		resp.Fulfillment[t] = res
+	}
+
+	return nil
+}
+
+func dispenseTablet(rd *requestData, tabletID api.TabletID, amount api.TabletAmount) (api.TabletAmount, error) {
+	dispenser, ok := rd.tabletDispensers[tabletID]
+	if !ok {
+		return 0, fmt.Errorf("dispenser for tablet id %s not found", tabletID)
+	}
+
+	for i := api.TabletAmount(0); i < amount; i++ {
+		dispenser.Rotate()
+	}
+
+	return amount, nil
+}
+
+func status(rd *requestData) (*api.DeviceTabletStatusResponse, error) {
+	request := api.DeviceTabletStatusRequest{
+		DeviceID: rd.deviceID,
+	}
+	resp, err := rd.requester.PostJson(api.DeviceStatusEndpoint, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		errText := fmt.Sprintf("error reading status response: %v", err)
+		log.Println(errText)
+		return nil, errors.New(errText)
+	}
+
+	var status api.DeviceTabletStatusResponse
+	err = json.Unmarshal(data, &status)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing json status response: %v", err)
+	}
+	return &status, nil
 }
 
 type httpRequester struct {
@@ -112,18 +228,18 @@ func (h *httpRequester) PostJson(endpoint string, val interface{}) (*http.Respon
 	}
 
 	if resp.StatusCode != 200 {
+		defer resp.Body.Close()
 		data, readErr := ioutil.ReadAll(resp.Body)
 		if readErr != nil {
 			data = []byte{}
 		}
-		resp.Body.Close()
 		text := string(data)
 		errText := fmt.Sprintf("request to %s failed with %d status code: %s", url, resp.StatusCode, text)
 		log.Println(errText)
 		return nil, errors.New(errText)
 	}
 
-	log.Println("request to %s succeed", url)
+	log.Printf("request to %s succeed", url)
 
 	return resp, nil
 }
