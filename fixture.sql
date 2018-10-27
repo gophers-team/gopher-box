@@ -19,3 +19,8 @@ INSERT INTO dispensing_schedule VALUES
 (5, 1, 1, 3, 5, "2018-01-01 10:00:00", 15, CURRENT_TIMESTAMP),
 (6, 1, 1, 3, 6, "2018-01-01 10:00:00", 15, CURRENT_TIMESTAMP),
 (7, 1, 1, 3, 7, "2018-01-01 10:00:00", 15, CURRENT_TIMESTAMP);
+
+------------------------------------------------------------------
+-- Devices
+INSERT INTO devices
+VALUES(1, 1, "gopher-box", CURRENT_TIMESTAMP)

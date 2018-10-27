@@ -49,7 +49,7 @@ func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed to unmarshal /status request"))
 		return
 	}
-	operationID, err := dispensingBegin(db, s.DeviceID)
+	operationID, pills, err := dispensingBegin(db, s.DeviceID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed begin dispensing"))
@@ -58,6 +58,7 @@ func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 
 	resp := api.DeviceTabletStatusResponse{
 		OperationID: api.OperationID(operationID),
+		Tablets:     pills,
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

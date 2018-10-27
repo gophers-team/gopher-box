@@ -6,13 +6,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/gophers-team/gopher-box/api"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/gophers-team/gopher-box/api"
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/drivers/gpio"
 	"gobot.io/x/gobot/platforms/firmata"
@@ -54,11 +54,9 @@ func (t *tabletDispenser) Rotate() {
 
 func (t *tabletDispenser) DbgRotate() {
 	t.motor.SetSpeed(t.rpm)
-	for {
-		err := t.motor.Move(t.step)
-		if err != nil {
-			log.Fatalf("dispenser for tablet %s move error: %v", t.tabletID, err)
-		}
+	err := t.motor.Move(t.step)
+	if err != nil {
+		log.Fatalf("dispenser for tablet %s move error: %v", t.tabletID, err)
 	}
 }
 
