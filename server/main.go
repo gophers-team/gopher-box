@@ -3,19 +3,19 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gophers-team/gopher-box/api"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/gophers-team/gopher-box/api"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func DbHandler(db *sqlx.DB, handler func(db *sqlx.DB, w http.ResponseWriter, r * http.Request)) http.HandlerFunc {
-	fn := func(w http.ResponseWriter, r * http.Request) {
+func DbHandler(db *sqlx.DB, handler func(db *sqlx.DB, w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 		handler(db, w, r)
 	}
 	return http.HandlerFunc(fn)
@@ -49,7 +49,6 @@ func deviceDispenseHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(500)
 		w.Write([]byte("Failed to read device /dispense request"))
 	}
-	db.
 }
 
 func main() {
