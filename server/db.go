@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -40,7 +42,18 @@ type DeviceDispensing struct {
 	CreatedAt      time.Time `db:"created_at"`
 }
 
-func InitDb(dbFile string) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("sqlite3", dbFile)
+func InitDb(dbFile string, devel bool) (*sqlx.DB, error) {
+	var db *sqlx.DB
+	var err error
+	if devel {
+		fmt.Println("Using sqlite3 db")
+		db, err = sqlx.Connect("sqlite3", dbFile)
+	} else {
+		fmt.Println("Using postgres db")
+		db, err = sqlx.Connect(
+			"postgres",
+			"host=127.0.0.1 port=5432 user=box password=box dbname=box sslmode=disable",
+		)
+	}
 	return db, err
 }
