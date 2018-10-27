@@ -1,4 +1,4 @@
-curl -X POST http://127.0.0.1:8000/status \
+curl -v -X POST http://127.0.0.1:8000/status \
     -H "Contenty-Type: application/json" \
     -d '{"device_id": 1}' 
 
