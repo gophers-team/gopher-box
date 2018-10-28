@@ -28,7 +28,7 @@ func getPills(db *sqlx.DB, deviceID api.DeviceID) (pills map[api.TabletID]api.Ta
 		INNER JOIN devices AS d ON d.plan_id = dp.id
 		INNER JOIN pills AS p ON p.id = ds.pill_id
 		LEFT JOIN device_dispensings as dd ON ds.id = dd.schedule_id
-		WHERE d.id = 1 AND (dd.status = $2 OR dd.status IS NULL)
+		WHERE d.id = $1 AND (dd.status = $2 OR dd.status IS NULL)
 		GROUP BY p.name, ds.id, ds.amount, ds.interval;
 	`, deviceID, DispensingStatusFinished)
 	if err != nil {
@@ -88,7 +88,7 @@ func getDeviceShortInfo(db *sqlx.DB, deviceID api.DeviceID) string {
 		INNER JOIN devices AS d ON d.plan_id = dp.id
 		INNER JOIN pills AS p ON p.id = ds.pill_id
 		LEFT JOIN device_dispensings as dd ON ds.id = dd.schedule_id
-		WHERE d.id = 1 AND (dd.status = $2 OR dd.status IS NULL)
+		WHERE d.id = $1 AND (dd.status = $2 OR dd.status IS NULL)
 		GROUP BY p.name, ds.id, ds.amount, ds.interval;
 	`, deviceID, DispensingStatusFinished)
 	if err != nil {
