@@ -16,10 +16,6 @@ func DbHandler(db *sqlx.DB, handler func(db *sqlx.DB, w http.ResponseWriter, r *
 	return http.HandlerFunc(fn)
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("GopherBox!\n"))
-}
-
 func heartbeatHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 	var h api.DeviceHeartbeat
 	if err := json.NewDecoder(r.Body).Decode(&h); err != nil {
@@ -38,6 +34,7 @@ func dispenseHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed to unmarshal /dispense request"))
 		return
 	}
+	log.Println("/dispense", t.DeviceID, t.OperationID)
 	err := dispensingEnd(db, t.OperationID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,7 +57,7 @@ func statusHandler(db *sqlx.DB, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Failed begin dispensing"))
 		return
 	}
-
+	log.Println("op_id", operationID)
 	resp := api.DeviceTabletStatusResponse{
 		OperationID: api.OperationID(operationID),
 		Tablets:     pills,

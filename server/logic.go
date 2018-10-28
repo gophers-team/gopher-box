@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -50,11 +49,16 @@ func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pil
 	tx := db.MustBegin()
 	defer tx.Commit()
 
-	res := tx.MustExec(`
+	row := tx.QueryRow(`
 		INSERT INTO device_dispensings (device_id, status, created_at)
 		VALUES ($1, $2, $3)
+        RETURNING id
 	`, deviceID, "begin", time.Now())
-	operationID, err = res.LastInsertId()
+
+	err = row.Scan(&operationID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	pills, err = getPills(db, deviceID)
 	return operationID, pills, err
@@ -69,7 +73,8 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 		SELECT h.device_id, d.name, MAX(h.created_at)
 		FROM heartbeats as h
 		JOIN devices as d ON h.device_id = d.id
-		GROUP BY h.device_id, d.name;`,
+		GROUP BY h.device_id, d.name
+		ORDER BY h.device_id`,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -82,11 +87,11 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(createdAt)
 		deviceInfo.Status = api.DeviceStatusOnline
 		if time.Since(createdAt) >= 5 * time.Second{
 			deviceInfo.Status = api.DeviceStatusOffline
 		}
+		deviceInfo.Info = "info"
 		infos = append(infos, deviceInfo)
 	}
 	return infos
@@ -98,8 +103,8 @@ func dispensingEnd(db *sqlx.DB, operationID api.OperationID) (err error) {
 	tx.MustExec(`
 		UPDATE device_dispensings
 		SET status = $1
-		WHERE operation_id = $3
-	`, operationID, "finished")
+		WHERE id = $2
+	`, "finished", operationID)
 	err = tx.Commit()
 
 	return err

@@ -45,6 +45,7 @@ type DeviceInfo struct {
 	DeviceID DeviceID     `json:"device_id"`
 	Name     string       `json:"name"`
 	Status   DeviceStatus `json:"status"`
+	Info     string       `json:"info"`
 }
 
 type DeviceListResponse []DeviceInfo

@@ -23,7 +23,7 @@ deploy:
 	ssh root@130.193.56.206 'systemctl stop gopher-box.service;'
 
 	ssh root@130.193.56.206 'cd /srv && /usr/local/go/bin/go build -o /usr/local/bin/gopher-box ./server'
-	ssh root@130.193.56.206 'systemctl restart gopher-box.service; systemctl daemon-reload; systemctl restart gopher-box.service'
+	ssh root@130.193.56.206 'systemctl daemon-reload; systemctl restart gopher-box.service'
 
 deploy_static:
 	scp -r ./static root@130.193.56.206:/srv
