@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -83,37 +84,35 @@ func getDeviceShortInfo(db *sqlx.DB, deviceID api.DeviceID) string {
 	defer tx.Commit()
 
 	rows, err := tx.Queryx(`
-		SELECT p.name, ds.id, ds.amount, ds.interval, COALESCE(MAX(dd.changed_at), '2018-10-10 01:16:30.3404') FROM dispensing_schedule AS ds
-		INNER JOIN dispensing_plans AS dp ON ds.plan_id = dp.id
-		INNER JOIN devices AS d ON d.plan_id = dp.id
-		INNER JOIN pills AS p ON p.id = ds.pill_id
-		LEFT JOIN device_dispensings as dd ON ds.id = dd.schedule_id
-		WHERE d.id = $1 AND (dd.status = $2 OR dd.status IS NULL)
-		GROUP BY p.name, ds.id, ds.amount, ds.interval;
+		SELECT dd.changed_at, ds.interval
+		FROM device_dispensings AS dd
+		 JOIN dispensing_schedule AS ds
+		 ON dd.schedule_id=ds.id
+		WHERE dd.device_id = $1
+		 AND dd.status = $2
+		ORDER BY dd.changed_at DESC
+		LIMIT 1
 	`, deviceID, DispensingStatusFinished)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var (
-		name string
-		scheduleID int
-		interval int
-		amount   int
 		changedAt time.Time
+		interval int
 	)
 	// :DDDDDDDDD
 	for rows.Next() {
-		err := rows.Scan(&name, &scheduleID, &amount, &interval, &changedAt)
+		err := rows.Scan(&changedAt, &interval)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		log.Println("pills", name, amount, changedAt)
+		log.Println("pills", changedAt)
 	}
 	diff := time.Since(changedAt)
 	if diff > time.Duration(interval) * time.Minute {
-		return "Late for " + string(diff) + "minutes"
+		return fmt.Sprintf("Late for %2.0f minutes", diff.Minutes())
 	} else {
 		return "On schedule"
 	}
