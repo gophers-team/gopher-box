@@ -15,6 +15,8 @@ make build_main_local
 ./build/gopher-box -db-file ./events.db -init-db -port 8080 -server
 ```
 
+Device requires your Arduino to be flashed with [Firmata Firmware](https://github.com/firmata/arduino). You can make it with [gort](http://gort.io/), gobot has [instructions](https://gobot.io/documentation/platforms/arduino/) for different platforms.
+
 Build Device for arm64:
 ```
 make build_device
@@ -27,4 +29,3 @@ make build_device_local
 ./build/device
 ```
 
-Device requires your Arduino to be flahed with [Firmata Firmware](https://github.com/firmata/arduino). You can make it with [gort](http://gort.io/), gobot has [instructions](https://gobot.io/documentation/platforms/arduino/) for different platforms.
