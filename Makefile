@@ -22,7 +22,7 @@ deploy:
 	scp go.sum root@130.193.56.206:/srv/go.sum
 	scp -r ./server root@130.193.56.206:/srv
 	scp -r ./api root@130.193.56.206:/srv
-	scp -r ./static root@130.193.56.206:/srv/static
+	scp -r ./static root@130.193.56.206:/srv/
 	scp ./gopher-box.service root@130.193.56.206:/etc/systemd/system/gopher-box.service
 	scp fixture.sql root@130.193.56.206:/srv/fixture.sql
 

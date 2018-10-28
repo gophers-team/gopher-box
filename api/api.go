@@ -3,8 +3,8 @@ package api
 type DeviceID int
 type EventType string
 type OperationID int64
-type DeviceStatus string
 
+type DeviceStatus string
 const (
 	DeviceStatusUnspecified DeviceStatus = "unspecified"
 	DeviceStatusOnline                   = "online"
