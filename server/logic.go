@@ -28,7 +28,7 @@ func getPills(db *sqlx.DB, deviceID api.DeviceID) (pills map[api.TabletID]api.Ta
 		INNER JOIN devices AS d ON d.plan_id = dp.id
 		INNER JOIN pills AS p ON p.id = ds.pill_id
 		LEFT JOIN device_dispensings as dd ON ds.id = dd.schedule_id
-		WHERE d.id = $1 AND (dd.status = $2 OR dd.status IS NULL)
+		WHERE d.id = 1 AND (dd.status = $2 OR dd.status IS NULL)
 		GROUP BY p.name, ds.id, ds.amount, ds.interval;
 	`, deviceID, DispensingStatusFinished)
 	if err != nil {
@@ -78,6 +78,46 @@ func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pil
 	return operationID, pills, err
 }
 
+func getDeviceShortInfo(db *sqlx.DB, deviceID api.DeviceID) string {
+	tx := db.MustBegin()
+	defer tx.Commit()
+
+	rows, err := tx.Queryx(`
+		SELECT p.name, ds.id, ds.amount, ds.interval, COALESCE(MAX(dd.changed_at), '2018-10-10 01:16:30.3404') FROM dispensing_schedule AS ds
+		INNER JOIN dispensing_plans AS dp ON ds.plan_id = dp.id
+		INNER JOIN devices AS d ON d.plan_id = dp.id
+		INNER JOIN pills AS p ON p.id = ds.pill_id
+		LEFT JOIN device_dispensings as dd ON ds.id = dd.schedule_id
+		WHERE d.id = 1 AND (dd.status = $2 OR dd.status IS NULL)
+		GROUP BY p.name, ds.id, ds.amount, ds.interval;
+	`, deviceID, DispensingStatusFinished)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var (
+		name string
+		scheduleID int
+		interval int
+		amount   int
+		changedAt time.Time
+	)
+	// :DDDDDDDDD
+	for rows.Next() {
+		err := rows.Scan(&name, &scheduleID, &amount, &interval, &changedAt)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println("pills", name, amount, changedAt)
+	}
+	diff := time.Since(changedAt)
+	if diff > time.Duration(interval) * time.Minute {
+		return "Late for " + string(diff) + "minutes"
+	} else {
+		return "On schedule"
+	}
+}
 func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 	var infos []api.DeviceInfo
 	tx := db.MustBegin()
@@ -105,7 +145,7 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 		if time.Since(createdAt) >= 5 * time.Second{
 			deviceInfo.Status = api.DeviceStatusOffline
 		}
-		deviceInfo.Info = "info"
+		deviceInfo.Info = getDeviceShortInfo(db, deviceInfo.DeviceID)
 		infos = append(infos, deviceInfo)
 	}
 	return infos
