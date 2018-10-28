@@ -42,10 +42,11 @@ type DeviceTabletDispenseRequest struct {
 var DeviceEndpoint = "/device"
 
 type DeviceInfo struct {
-	DeviceID DeviceID     `json:"device_id"`
-	Name     string       `json:"name"`
-	Status   DeviceStatus `json:"status"`
-	Info     string       `json:"info"`
+	DeviceID     DeviceID     `json:"device_id"`
+	Name         string       `json:"name"`
+	DeviceStatus DeviceStatus `json:"device_status"`
+	Info         string       `json:"info"`
+	InfoStatus   string       `json:"info_status"`
 }
 
 type DeviceListResponse []DeviceInfo

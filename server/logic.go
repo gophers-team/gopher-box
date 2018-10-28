@@ -51,7 +51,7 @@ func getPills(db *sqlx.DB, deviceID api.DeviceID) (pills map[api.TabletID]api.Ta
 		log.Println("pills", name, amount, changedAt)
 	}
 	log.Println("diff", time.Since(changedAt).Minutes())
-	if time.Since(changedAt).Minutes() < float64(interval) {
+	if time.Since(changedAt) < time.Duration(interval) * time.Minute {
 		amount = 0
 	}
 	pills[api.TabletID(name)] = api.TabletAmount(amount)
@@ -79,7 +79,7 @@ func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pil
 	return operationID, pills, err
 }
 
-func getDeviceShortInfo(db *sqlx.DB, deviceID api.DeviceID) string {
+func getDeviceShortInfo(db *sqlx.DB, deviceID api.DeviceID) float64 {
 	tx := db.MustBegin()
 	defer tx.Commit()
 
@@ -112,9 +112,9 @@ func getDeviceShortInfo(db *sqlx.DB, deviceID api.DeviceID) string {
 	}
 	diff := time.Since(changedAt)
 	if diff > time.Duration(interval) * time.Minute {
-		return fmt.Sprintf("Late for %2.0f minutes", diff.Minutes())
+		return diff.Minutes()
 	} else {
-		return "On schedule"
+		return 0
 	}
 }
 func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
@@ -140,11 +140,18 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 		if err != nil {
 			log.Fatal(err)
 		}
-		deviceInfo.Status = api.DeviceStatusOnline
+		deviceInfo.DeviceStatus = api.DeviceStatusOnline
 		if time.Since(createdAt) >= 5 * time.Second{
-			deviceInfo.Status = api.DeviceStatusOffline
+			deviceInfo.DeviceStatus = api.DeviceStatusOffline
 		}
-		deviceInfo.Info = getDeviceShortInfo(db, deviceInfo.DeviceID)
+		diff := getDeviceShortInfo(db, deviceInfo.DeviceID)
+		if diff == 0 {
+			deviceInfo.Info = "On schedule"
+			deviceInfo.InfoStatus = "OK"
+		} else {
+			deviceInfo.Info = fmt.Sprintf("Late for %2.0f minutes", diff)
+			deviceInfo.InfoStatus = "EAT"
+		}
 		infos = append(infos, deviceInfo)
 	}
 	return infos

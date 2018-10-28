@@ -45,12 +45,13 @@ $(document).ready(function(){
                 devices.append('<tr>');
                 devices.append('<td>' + el['device_id'] + '</td>');
                 devices.append('<td>' + el['name'] + '</td>');
-                if (el['status'] == 'online') {
+                if (el['device_status'] == 'online') {
                     devices.append('<td class="text-success">online</td>');
                 } else {
                     devices.append('<td class="text-danger">offline</td>');
                 }
-                devices.append('<td class="bg-light">' + el['info'] + '</td>');
+                var class_type = el['info_status'] == 'OK' ? "text-success"  : "text-danger";
+                devices.append('<td class="' + class_type + '">' + el['info'] + '</td>');
                 devices.append('</tr>');
             });
         });
