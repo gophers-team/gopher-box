@@ -1,15 +1,21 @@
-.PHONY: build build_device build_main build_main_local deploy deploy_device
+.PHONY: build build_local build_device build_device_local build_main build_main_local deploy deploy_device deploy_static
 
 build_device:
 	GOARCH=arm64 GOOS=linux go build -o ./build/device ./device
 
+build_device_local:
+	go build -o ./build/device ./device
+
 build_main:
 	GOARCH=amd64 GOOS=linux go build -o ./build/gopher-box ./server
 
-build: build_device build_main
-
 build_main_local:
 	go build -o ./build/gopher-box ./server
+
+build: build_device build_main
+
+build_local: build_device_local build_main_local
+
 
 deploy:
 	scp go.mod root@130.193.56.206:/srv/go.mod
