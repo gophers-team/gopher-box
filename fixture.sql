@@ -23,7 +23,7 @@ INSERT INTO dispensing_schedule(id, plan_id, pill_id, amount, dispense_dow, disp
 ------------------------------------------------------------------
 -- Devices
 INSERT INTO devices(id, plan_id, name, created_at) VALUES
-(1, 1, 'Gomer Simpson device', CURRENT_TIMESTAMP),
+(1, 1, 'Homer Simpson device', CURRENT_TIMESTAMP),
 (2, 1, 'Rick Sanchez', CURRENT_TIMESTAMP),
 (3, 1, 'Finn the human', CURRENT_TIMESTAMP),
 (4, 1, 'Avocato', CURRENT_TIMESTAMP);

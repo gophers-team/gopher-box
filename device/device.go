@@ -101,7 +101,7 @@ func main() {
 	stepsPerRev := flag.Uint("steps-per-rev", 2038, "steps per rev")
 	step := flag.Int("step", -2038, "step")
 	rpm := flag.Uint("rpm", 10, "rpm speed")
-	heartbeetInterval := flag.Duration("heartbeat-interval", 10*time.Second, "interval between heartbeats")
+	heartbeetInterval := flag.Duration("heartbeat-interval", time.Second, "interval between heartbeats")
 	server := flag.String("server", "130.193.56.206", "address of server to send data to")
 	deviceID := flag.Int("device-id", 1, "the (unique) id of the device")
 	tabletID := flag.String("tablet-id", "red", "tablet id (type of tablets)")
@@ -189,7 +189,7 @@ func main() {
 					defer atomic.StoreUint32(&inButtonHandler, 0)
 					err = tabletButtonPush(rd, *debugStatusOk)
 					if err != nil {
-						log.Fatalf("error processing button push: %v", err)
+						log.Println("error processing button push: %v", err)
 					}
 				}()
 
@@ -269,10 +269,29 @@ func tabletButtonPush(rd *requestData, debugStatusOk bool) error {
 		if amount != 0 {
 			go rd.BlinkOkLed(uint(amount))
 			res, err = dispenseTablet(rd, t, amount)
+			if err != nil {
+				rd.BlinkFailLed(3)
+			}
 		} else {
 			rd.BlinkFailLed(1)
 		}
 		resp.Fulfillment[t] = res
+	}
+
+	dispenseResp, err := rd.requester.PostJson(api.DeviceDispenseEndpoint, &resp)
+	if err != nil {
+		log.Println("error requesting dispense:", err)
+		rd.BlinkFailLed(4)
+		return err
+	}
+
+	defer dispenseResp.Body.Close()
+	_, err = ioutil.ReadAll(dispenseResp.Body)
+	if err != nil {
+		errText := fmt.Sprintf("error reading dispense response: %v", err)
+		log.Println(errText)
+		rd.BlinkFailLed(4)
+		return errors.New(errText)
 	}
 
 	return nil
