@@ -31,19 +31,18 @@ CREATE TABLE dispensing_schedule (
     plan_id     		INTEGER REFERENCES dispensing_plans(id),
 	pill_id				INTEGER REFERENCES pills(id),
 	amount				INTEGER NOT NULL,
-	dispense_dow		INTEGER NOT NULL,
-	dispense_time   	TIMESTAMP NOT NULL,
-	schedule_duration 	INTEGER NOT NULL,
+    interval            INTEGER NOT NULL,
 	created_at  		TIMESTAMP
 );
 
 CREATE TABLE device_dispensings (
 	id          	SERIAL PRIMARY KEY,
     device_id     	INTEGER REFERENCES devices(id),
-	schedule_id		INTEGER  REFERENCES dispensing_schedule(id),
+	schedule_id		INTEGER REFERENCES dispensing_schedule(id),
 	pills_dispensed	INTEGER,
 	status 			VARCHAR(255) NOT NULL,
-    created_at  	TIMESTAMP
+    created_at  	TIMESTAMP,
+    changed_at      TIMESTAMP
 );
 `
 /*

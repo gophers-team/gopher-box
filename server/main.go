@@ -43,7 +43,7 @@ func main() {
 
 			schedules := []DispensingSchedule{}
 			err = db.Select(
-				&schedules, "SELECT * FROM dispensing_schedule WHERE plan_id=$1 ORDER BY dispense_dow", plan.Id,
+				&schedules, "SELECT * FROM dispensing_schedule WHERE plan_id=$1", plan.Id,
 			)
 			if err != nil {
 				log.Fatal(err)

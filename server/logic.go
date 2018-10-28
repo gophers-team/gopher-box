@@ -17,50 +17,64 @@ func saveHeartbeat(db *sqlx.DB, deviceID api.DeviceID) {
 	`, deviceID, time.Now())
 }
 
-func getPills(db *sqlx.DB, deviceID api.DeviceID) (pills map[api.TabletID]api.TabletAmount, err error) {
+func getPills(db *sqlx.DB, deviceID api.DeviceID) (pills map[api.TabletID]api.TabletAmount, schedule_id int, err error) {
 	pills = make(map[api.TabletID]api.TabletAmount)
 	tx := db.MustBegin()
 	defer tx.Commit()
 
 	rows, err := tx.Queryx(`
-		SELECT p.name, ds.amount FROM dispensing_schedule AS ds
+		SELECT p.name, ds.id, ds.amount, ds.interval, COALESCE(MAX(dd.changed_at), '2018-10-10 01:16:30.3404') FROM dispensing_schedule AS ds
 		INNER JOIN dispensing_plans AS dp ON ds.plan_id = dp.id
 		INNER JOIN devices AS d ON d.plan_id = dp.id
 		INNER JOIN pills AS p ON p.id = ds.pill_id
-		WHERE d.id = $1
-	`, deviceID)
+		LEFT JOIN device_dispensings as dd ON ds.id = dd.schedule_id
+		WHERE d.id = $1 AND (dd.status = $2 OR dd.status IS NULL)
+		GROUP BY p.name, ds.id, ds.amount, ds.interval;
+	`, deviceID, DispensingStatusFinished)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// var schedule_id int // :DDDDDDDD
+	var name string
+	var interval int
+	var amount   int
+	var changedAt time.Time
+	// :DDDDDDDDD
 	for rows.Next() {
-		var name string
-		var amount int
-		err := rows.Scan(&name, &amount)
+		err := rows.Scan(&name, &schedule_id, &amount, &interval, &changedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
-		pills[api.TabletID(name)] = api.TabletAmount(amount)
+
+		log.Println("pills", name, amount, changedAt)
 	}
-	return pills, nil
+	log.Println("diff", time.Since(changedAt).Minutes())
+	if time.Since(changedAt).Minutes() < float64(interval) {
+		amount = 0
+	}
+	pills[api.TabletID(name)] = api.TabletAmount(amount)
+	return pills, schedule_id, nil
 }
 
 func dispensingBegin(db *sqlx.DB, deviceID api.DeviceID) (operationID int64, pills map[api.TabletID]api.TabletAmount, err error) {
 	tx := db.MustBegin()
 	defer tx.Commit()
 
+	pills, scheduleId, err := getPills(db, deviceID)
+
+	now := time.Now()
 	row := tx.QueryRow(`
-		INSERT INTO device_dispensings (device_id, status, created_at)
-		VALUES ($1, $2, $3)
+		INSERT INTO device_dispensings (device_id, status, created_at, changed_at, schedule_id)
+		VALUES ($1, $2, $3, $3, $4)
         RETURNING id
-	`, deviceID, "begin", time.Now())
+	`, deviceID, DispensingStatusBegin, now, scheduleId)
 
 	err = row.Scan(&operationID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pills, err = getPills(db, deviceID)
 	return operationID, pills, err
 }
 
@@ -97,14 +111,14 @@ func getDeviceInfos(db *sqlx.DB) []api.DeviceInfo {
 	return infos
 }
 
-func dispensingEnd(db *sqlx.DB, operationID api.OperationID) (err error) {
+func dispensingEnd(db *sqlx.DB, operationID api.OperationID, status DispensingStatus) (err error) {
 	tx := db.MustBegin()
 
 	tx.MustExec(`
 		UPDATE device_dispensings
-		SET status = $1
-		WHERE id = $2
-	`, "finished", operationID)
+		SET status = $1, changed_at = $2
+		WHERE id = $3
+	`, status, time.Now(), operationID)
 	err = tx.Commit()
 
 	return err

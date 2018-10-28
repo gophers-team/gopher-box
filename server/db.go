@@ -7,11 +7,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type EventType uint8
-
+type DispensingStatus string
 const (
-	Heartbeat EventType = iota
-	PillsDispensed
+	DispensingStatusBegin    DispensingStatus = "begin"
+	DispensingStatusFinished                  = "finished"
+	DispensingStatusFailed                    = "failed"
 )
 
 type DispensingPlan struct {
@@ -25,9 +25,7 @@ type DispensingSchedule struct {
 	PlanId           int       `db:"plan_id"`
 	PillId           int       `db:"pill_id"`
 	Amount           int       `db:"amount"`
-	DispenseDow      int       `db:"dispense_dow"`
-	ScheduleDuration int       `db:"schedule_duration"`
-	DispenseTime     time.Time `db:"dispense_time"`
+	Interval         int       `db:"interval"`
 	CreatedAt        time.Time `db:"created_at"`
 }
 
